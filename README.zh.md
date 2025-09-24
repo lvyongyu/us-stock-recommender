@@ -2,7 +2,10 @@
 
 一个功能强大的多语言美股分析和推荐系统，采用模块化架构设计，支持多种分析策略和完整的测试框架。
 
-[中文文档](README.zh.md) | [English Documentation](README.md)
+## 📖 文档
+
+- [🇺🇸 English](README.md)
+- [🇨🇳 中文文档](README.zh.md) ← 当前页面
 
 ## 功能特点
 
