@@ -83,6 +83,15 @@ python3 stock_recommender.py TSLA --period 6mo --lang zh
 - **Sell**: Composite Score -50 to -25
 - **Strong Sell/Short**: Composite Score <= -50
 
+## 📚 Documentation
+
+For detailed analysis of the strategy system and implementation:
+
+- **[Strategy Analysis (中文)](./docs/STRATEGY_ANALYSIS.md)** - Complete strategy system analysis and implementation details
+- **[Strategy Analysis (English)](./docs/STRATEGY_ANALYSIS_EN.md)** - English version of strategy analysis
+- **[Quick Reference (快速参考)](./docs/STRATEGY_QUICK_REFERENCE.md)** - Quick reference guide for strategy usage
+- **[Documentation Index](./docs/README.md)** - Complete documentation directory
+
 ## Example Output
 
 ### English Version
