@@ -33,7 +33,7 @@ class StockAnalyzer:
             
         indicators = {}
         
-        # 移动平均线
+        # Moving Averages
         indicators['sma_20'] = self.data['Close'].rolling(window=20).mean()
         indicators['sma_50'] = self.data['Close'].rolling(window=50).mean()
         indicators['ema_12'] = self.data['Close'].ewm(span=12).mean()
@@ -51,13 +51,13 @@ class StockAnalyzer:
         rs = gain / loss
         indicators['rsi'] = 100 - (100 / (1 + rs))
         
-        # 布林带
+        # Bollinger Bands
         sma_20 = indicators['sma_20']
         std_20 = self.data['Close'].rolling(window=20).std()
         indicators['bb_upper'] = sma_20 + (std_20 * 2)
         indicators['bb_lower'] = sma_20 - (std_20 * 2)
         
-        # 成交量分析
+        # Volume Analysis
         indicators['volume_sma'] = self.data['Volume'].rolling(window=20).mean()
         
         return indicators
@@ -84,7 +84,7 @@ class StockAnalyzer:
             'bb_lower': indicators['bb_lower'].iloc[-1],
         }
         
-        # 计算价格变化
+        # Calculate price changes
         metrics['price_change'] = current_price - metrics['previous_close']
         metrics['price_change_pct'] = (metrics['price_change'] / metrics['previous_close']) * 100
         
