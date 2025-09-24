@@ -7,6 +7,10 @@
 - **[Strategy Analysis (English)](./STRATEGY_ANALYSIS_EN.md)** - Complete strategy system analysis and implementation principles
 - **[策略快速参考](./STRATEGY_QUICK_REFERENCE.md)** - 快速查阅策略要点和使用方法
 
+### 📦 发布文档
+- **[PyPI Publishing Guide](./PYPI_PUBLISHING_GUIDE.md)** - Complete guide for publishing to PyPI
+- **[Release Checklist](./RELEASE_CHECKLIST.md)** - Pre-release checklist and procedures
+
 ### 📖 文档内容概览
 
 #### 策略分析详细文档

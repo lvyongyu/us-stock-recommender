@@ -23,7 +23,25 @@ A powerful multi-language US stock analysis and recommendation system with modul
 
 ## Installation
 
+### Option 1: Install from PyPI (Recommended)
+
 ```bash
+pip install us-stock-recommender
+```
+
+After installation, you can use the command directly:
+```bash
+stock-recommender AAPL
+```
+
+### Option 2: Install from Source
+
+```bash
+# Clone the repository
+git clone https://github.com/lvyongyu/us-stock-recommender.git
+cd us-stock-recommender
+
+# Install dependencies
 pip3 install -r requirements.txt
 ```
 

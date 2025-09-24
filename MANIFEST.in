@@ -1,0 +1,36 @@
+# Include important files
+include README.md
+include README.zh.md
+include LICENSE
+include requirements.txt
+include pyproject.toml
+include setup.cfg
+
+# Include documentation
+recursive-include docs *.md
+
+# Include source code
+recursive-include src *.py
+
+# Include the main script
+include stock_recommender.py
+
+# Include tests for source distribution
+recursive-include tests *.py
+
+# Exclude unnecessary files
+global-exclude *.pyc
+global-exclude *.pyo
+global-exclude *~
+global-exclude __pycache__
+global-exclude .DS_Store
+global-exclude .git*
+global-exclude .pytest_cache
+global-exclude .coverage
+global-exclude htmlcov
+global-exclude .tox
+global-exclude .venv
+global-exclude venv
+global-exclude build
+global-exclude dist
+global-exclude *.egg-info
