@@ -1,4 +1,4 @@
-# US Stock Recommendation System
+# US Stock Recommendation System - Intelligent Investment Strategy System Based on Technical Analysis
 
 A powerful multi-language US stock analysis and recommendation system with modular architecture design, supporting multiple analysis strategies and comprehensive testing framework.
 
