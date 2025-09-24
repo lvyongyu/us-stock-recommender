@@ -89,3 +89,4 @@ charts/
 
 # Local documentation (contains sensitive setup info)
 docs/GITHUB_SECRETS_SETUP.md
+PROJECT_CONTEXT.md
