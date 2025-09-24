@@ -86,3 +86,6 @@ charts/
 *.jpg
 *.jpeg
 *.pdf
+
+# Local documentation (contains sensitive setup info)
+docs/GITHUB_SECRETS_SETUP.md

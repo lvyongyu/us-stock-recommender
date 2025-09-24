@@ -1,4 +1,4 @@
-name: Publish to TestPyPI
+name: Test Package Build
 
 on:
   push:
@@ -7,10 +7,12 @@ on:
       - 'pyproject.toml'
       - 'src/**'
       - 'stock_recommender.py'
+  pull_request:
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
-  test-and-publish:
+  test-build:
     runs-on: ubuntu-latest
 
     steps:
@@ -27,7 +29,7 @@ jobs:
         pip install build twine pytest
         pip install -r requirements.txt
 
-    - name: Run quick tests
+    - name: Run tests
       run: |
         python -m pytest tests/ -x -v --tb=short
 
@@ -38,6 +40,28 @@ jobs:
       run: |
         python -m twine check dist/*
         ls -la dist/
+
+    # Only publish to TestPyPI on manual trigger or specific conditions
+  publish-to-testpypi:
+    needs: test-build
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install build dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install build twine
+
+    - name: Build package
+      run: python -m build
 
     - name: Publish to TestPyPI
       uses: pypa/gh-action-pypi-publish@release/v1
