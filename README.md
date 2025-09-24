@@ -274,11 +274,11 @@ python3 -m pytest tests/test_integration.py
 
 ```bash
 # 克隆项目 / Clone project
-git clone <repository-url>
-cd stock\ recommander
+git clone https://github.com/lvyongyu/us-stock-recommender.git
+cd "stock recommander"
 
 # 安装依赖 / Install dependencies
-pip install -r requirements.txt
+pip3 install -r requirements.txt
 
 # 运行测试 / Run tests
 bash run_ci_tests.sh
@@ -286,6 +286,13 @@ bash run_ci_tests.sh
 # 运行程序 / Run program
 python3 stock_recommender.py AAPL --lang zh
 ```
+
+### 推荐开发环境 / Recommended Development Environment
+
+- **Python**: 3.8+ (推荐 3.9+ / Recommended 3.9+)
+- **IDE**: VS Code, PyCharm, 或其他支持Python的IDE / VS Code, PyCharm, or other Python-supported IDE
+- **Git**: 最新版本 / Latest version
+- **操作系统 / OS**: macOS, Linux, Windows (推荐类Unix系统 / Unix-like systems recommended)
 
 ⚠️ **重要提醒 / Important Notice**: 本软件仅供学习和参考用途，不构成投资建议。股市有风险，投资需谨慎！使用本软件进行投资决策的风险由用户自行承担。
 
