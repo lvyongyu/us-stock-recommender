@@ -66,6 +66,89 @@ python3 stock_recommender.py TSLA --period 6mo --lang zh
 - `en`: English (英文)
 - `zh`: Chinese (中文)
 
+### 批量分析模式 🆕
+
+系统支持多股票批量分析功能，可以同时分析多只股票并生成综合报告。
+
+#### 命令行批量分析 (最多5只股票)
+
+```bash
+# 英文批量分析
+python3 stock_recommender.py --multi "AAPL,MSFT,GOOGL,TSLA" --lang en
+
+# 中文批量分析
+python3 stock_recommender.py --multi "AAPL,MSFT,GOOGL,TSLA" --lang zh
+
+# 指定策略的批量分析
+python3 stock_recommender.py --multi "AAPL,MSFT,GOOGL" --strategy technical --lang zh
+```
+
+#### 文件批量分析 (支持大量股票)
+
+```bash
+# 从TXT文件批量分析
+python3 stock_recommender.py --multi --file stocks.txt --lang zh
+
+# 从CSV文件批量分析  
+python3 stock_recommender.py --multi --file stocks.csv --lang en
+```
+
+#### 支持的文件格式
+
+**TXT格式示例** (`stocks.txt`):
+```
+# 股票列表
+AAPL
+MSFT
+GOOGL
+TSLA
+
+# 也支持逗号分隔
+NVDA, AMD, INTC
+```
+
+**CSV格式示例** (`stocks.csv`):
+```csv
+Symbol,Company,Sector
+AAPL,Apple Inc,Technology
+MSFT,Microsoft Corporation,Technology
+GOOGL,Alphabet Inc,Technology
+TSLA,Tesla Inc,Consumer Discretionary
+```
+
+#### 批量分析功能特点
+
+- 📊 **并发处理**: 智能并发管理，提高分析效率
+- 📈 **实时进度**: 实时进度条显示分析状态
+- 🎯 **智能重试**: 自动重试失败的股票分析
+- 📋 **分类汇总**: 自动按投资建议分类显示结果
+- 🛡️ **错误处理**: 友好的错误信息和股票代码纠错
+- ⚡ **速度优化**: API速率限制和资源管理
+
+#### 批量分析输出示例
+
+```
+================================================================================
+                                股票推荐结果
+================================================================================
+
+📈 强烈买入建议 (2只):
+   • AAPL: 强烈买入 (评分: 75) - 技术指标强劲，上升趋势明确
+   • MSFT: 强烈买入 (评分: 68) - 基本面优秀，动量良好
+
+💼 买入建议 (1只):
+   • GOOGL: 买入 (评分: 45) - 技术指标积极，有上升空间
+
+⚖️ 持有建议 (1只):  
+   • TSLA: 持有 (评分: 5) - 横盘整理中，等待突破
+
+📊 批量分析汇总:
+   总计股票: 4
+   成功分析: 4 (100.0%)
+   失败: 0
+   分析耗时: 12.3秒
+```
+
 ## 分析指标
 
 ### 技术指标

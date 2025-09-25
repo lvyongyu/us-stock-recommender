@@ -84,6 +84,89 @@ python3 stock_recommender.py TSLA --period 6mo --lang zh
 - `en`: English
 - `zh`: Chinese
 
+### Batch Analysis Mode 🆕
+
+The system supports multi-stock batch analysis functionality, enabling simultaneous analysis of multiple stocks with comprehensive reporting.
+
+#### Command Line Batch Analysis (Up to 5 stocks)
+
+```bash
+# English batch analysis
+python3 stock_recommender.py --multi "AAPL,MSFT,GOOGL,TSLA" --lang en
+
+# Chinese batch analysis
+python3 stock_recommender.py --multi "AAPL,MSFT,GOOGL,TSLA" --lang zh
+
+# Strategy-specific batch analysis
+python3 stock_recommender.py --multi "AAPL,MSFT,GOOGL" --strategy technical --lang en
+```
+
+#### File-based Batch Analysis (Support for large stock lists)
+
+```bash
+# Batch analysis from TXT file
+python3 stock_recommender.py --multi --file stocks.txt --lang en
+
+# Batch analysis from CSV file  
+python3 stock_recommender.py --multi --file stocks.csv --lang zh
+```
+
+#### Supported File Formats
+
+**TXT Format Example** (`stocks.txt`):
+```
+# Stock list
+AAPL
+MSFT
+GOOGL
+TSLA
+
+# Comma-separated format also supported
+NVDA, AMD, INTC
+```
+
+**CSV Format Example** (`stocks.csv`):
+```csv
+Symbol,Company,Sector
+AAPL,Apple Inc,Technology
+MSFT,Microsoft Corporation,Technology
+GOOGL,Alphabet Inc,Technology
+TSLA,Tesla Inc,Consumer Discretionary
+```
+
+#### Batch Analysis Features
+
+- 📊 **Concurrent Processing**: Smart concurrent management for improved analysis efficiency
+- 📈 **Real-time Progress**: Live progress bar showing analysis status
+- 🎯 **Smart Retry**: Automatic retry for failed stock analyses
+- 📋 **Categorized Summary**: Auto-categorization of results by investment recommendations
+- 🛡️ **Error Handling**: User-friendly error messages and stock symbol correction
+- ⚡ **Speed Optimization**: API rate limiting and resource management
+
+#### Batch Analysis Output Example
+
+```
+================================================================================
+                          US STOCK INVESTMENT RECOMMENDATIONS
+================================================================================
+
+📈 Strong Buy Recommendations (2 stocks):
+   • AAPL: Strong Buy (Score: 75) - Strong technical indicators, clear uptrend
+   • MSFT: Strong Buy (Score: 68) - Excellent fundamentals, good momentum
+
+💼 Buy Recommendations (1 stock):
+   • GOOGL: Buy (Score: 45) - Positive technical indicators, upside potential
+
+⚖️ Hold Recommendations (1 stock):  
+   • TSLA: Hold (Score: 5) - Sideways consolidation, awaiting breakout
+
+📊 Batch Analysis Summary:
+   Total Stocks: 4
+   Successfully Analyzed: 4 (100.0%)
+   Failed: 0
+   Analysis Time: 12.3s
+```
+
 ## Analysis Indicators
 
 ### Technical Indicators
