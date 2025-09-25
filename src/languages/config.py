@@ -20,3 +20,17 @@ class LanguageConfig:
     def get(self, key: str) -> str:
         """Get translated text by key"""
         return self.texts.get(key, key)
+
+
+def get_language_config(language: str = "en") -> Dict[str, str]:
+    """
+    Get language configuration dictionary for the specified language.
+    
+    Args:
+        language: Language code ('en' or 'zh')
+        
+    Returns:
+        Dictionary with localized strings
+    """
+    config = LanguageConfig(language)
+    return config.texts
