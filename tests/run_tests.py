@@ -104,14 +104,108 @@ def run_integration_tests_only():
     return run_tests(verbosity=2, pattern='test_integration.py')
 
 
+def run_unit_tests_only():
+    """Run unit tests only (exclude integration tests)"""
+    print("Running unit tests only...")
+    patterns = [
+        'test_stock_analyzer.py',
+        'test_strategies.py', 
+        'test_engines.py',
+        'test_language_config.py',
+        'test_utils.py'
+    ]
+    
+    print("=" * 70)
+    print("US STOCK RECOMMENDATION SYSTEM - UNIT TESTS")
+    print("=" * 70)
+    
+    loader = unittest.TestLoader()
+    test_dir = os.path.dirname(__file__)
+    suite = unittest.TestSuite()
+    
+    # Add unit test modules
+    for pattern in patterns:
+        try:
+            discovered = loader.discover(test_dir, pattern=pattern)
+            suite.addTest(discovered)
+        except Exception as e:
+            print(f"Warning: Could not load {pattern}: {e}")
+    
+    test_count = suite.countTestCases()
+    print(f"Found {test_count} unit tests")
+    print("-" * 70)
+    
+    runner = unittest.TextTestRunner(verbosity=2, failfast=False, buffer=True)
+    result = runner.run(suite)
+    
+    print("-" * 70)
+    print("UNIT TEST SUMMARY:")
+    print(f"Tests run: {result.testsRun}")
+    print(f"Failures: {len(result.failures)}")
+    print(f"Errors: {len(result.errors)}")
+    
+    success_rate = ((result.testsRun - len(result.failures) - len(result.errors)) / result.testsRun * 100) if result.testsRun > 0 else 0
+    print(f"Success Rate: {success_rate:.1f}%")
+    print("=" * 70)
+    
+    return result.wasSuccessful()
+
+
+def run_batch_tests_only():
+    """Run batch analysis related tests"""
+    print("Running batch analysis tests...")
+    patterns = [
+        'test_input_parser.py',
+        'test_multi_stock_integration.py'
+    ]
+    
+    print("=" * 70)
+    print("US STOCK RECOMMENDATION SYSTEM - BATCH TESTS")
+    print("=" * 70)
+    
+    loader = unittest.TestLoader()
+    test_dir = os.path.dirname(__file__)
+    suite = unittest.TestSuite()
+    
+    for pattern in patterns:
+        try:
+            discovered = loader.discover(test_dir, pattern=pattern)
+            suite.addTest(discovered)
+        except Exception as e:
+            print(f"Warning: Could not load {pattern}: {e}")
+    
+    test_count = suite.countTestCases()
+    print(f"Found {test_count} batch tests")
+    print("-" * 70)
+    
+    runner = unittest.TextTestRunner(verbosity=2, failfast=False, buffer=True)
+    result = runner.run(suite)
+    
+    print("-" * 70)
+    print("BATCH TEST SUMMARY:")
+    print(f"Tests run: {result.testsRun}")
+    print(f"Failures: {len(result.failures)}")  
+    print(f"Errors: {len(result.errors)}")
+    
+    success_rate = ((result.testsRun - len(result.failures) - len(result.errors)) / result.testsRun * 100) if result.testsRun > 0 else 0
+    print(f"Success Rate: {success_rate:.1f}%")
+    print("=" * 70)
+    
+    return result.wasSuccessful()
+
+
 if __name__ == '__main__':
     import argparse
     
     parser = argparse.ArgumentParser(description='Run tests for US Stock Recommendation System')
+    parser.add_argument('--test-type', type=str, choices=['unit', 'integration', 'batch', 'all'],
+                       default='all', help='Type of tests to run')
     parser.add_argument('--quick', action='store_true', 
                        help='Run only quick unit tests')
     parser.add_argument('--integration', action='store_true', 
                        help='Run only integration tests')
+    parser.add_argument('--batch', action='store_true', 
+                       help='Run only batch analysis tests')
     parser.add_argument('--module', type=str, 
                        help='Run specific test module (e.g., test_strategies)')
     parser.add_argument('--verbose', '-v', action='store_true', 
@@ -122,10 +216,12 @@ if __name__ == '__main__':
     try:
         if args.module:
             success = run_specific_test(args.module)
-        elif args.quick:
-            success = run_quick_tests()
-        elif args.integration:
+        elif args.quick or args.test_type == 'unit':
+            success = run_unit_tests_only()
+        elif args.integration or args.test_type == 'integration':
             success = run_integration_tests_only()
+        elif args.batch or args.test_type == 'batch':
+            success = run_batch_tests_only()
         else:
             verbosity = 2 if args.verbose else 1
             success = run_tests(verbosity=verbosity)
