@@ -1,0 +1,15 @@
+# Sample stock list
+# One or more stock symbols per line
+
+AAPL
+MSFT
+GOOGL
+TSLA
+AMZN
+NVDA
+META
+NFLX
+
+# Can also use comma separation
+JPM, BAC, WFC
+ORCL CSCO IBM

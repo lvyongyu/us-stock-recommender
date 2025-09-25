@@ -91,6 +91,9 @@ TEXTS = {
     "help_language": "Language: en (English) or zh (Chinese) (default: en)",
     "help_description": "US Stock Recommendation System / 美股推荐系统",
     "help_strategy": "Trading strategy: technical, quantitative, ai, or all (default: all)",
+    "help_single_stock_mode": "(Single stock mode)",
+    "help_multi_stock_mode": "Multi-stock mode: optionally provide comma-separated stock symbols (<5), or use with --file",
+    "help_file_input": "Stock list file path (used with --multi)",
     
     # Strategy Names
     "strategy_technical": "Technical Indicators",
@@ -144,5 +147,62 @@ TEXTS = {
     "strategy_consensus_mixed": "Mixed signals from different strategies",
     "strategy_weight_technical": "Technical analysis weight: {}%",
     "strategy_weight_quantitative": "Quantitative model weight: {}%", 
-    "strategy_weight_ai": "AI/ML model weight: {}%"
+    "strategy_weight_ai": "AI/ML model weight: {}%",
+    
+    # Batch Analysis
+    "batch_analysis_start": "🚀 Starting batch stock analysis...",
+    "batch_stock_count": "📊 Number of stocks: {}",
+    "batch_strategy": "📈 Analysis strategy: {}",
+    "batch_period": "📅 Data period: {}",
+    "batch_concurrent_config": "⚙️  Concurrent config: {} threads, {}s interval",
+    "batch_analysis_complete": "📈 Batch analysis completed",
+    "batch_total_stocks": "📊 Total stocks: {}",
+    "batch_success_rate": "✅ Success: {} ({:.1f}%)",
+    "batch_failed_count": "❌ Failed: {}",
+    "batch_total_time": "⏱️  Total time: {}",
+    "batch_failed_details": "❌ Failed task details:",
+    "batch_avg_time": "📈 Average processing time: {}",
+    "batch_analysis_summary": "📈 Multi-stock analysis summary",
+    
+    # Error Messages - Friendly
+    "error_stock_not_exist_suggest": "{}: Stock code does not exist, you might want to enter {}",
+    "error_acquired_by": "{}: {}",
+    "error_bank_closed": "{}: {}",
+    "error_stock_delisted": "{}: Stock may be delisted or code is invalid",
+    "error_network_issue": "{}: Network connection issue, please try again later",
+    
+    # Progress Tracking
+    "progress_calculating": "Calculating...",
+    "progress_estimated_remaining": "Estimated remaining: {}",
+    
+    # Investment Portfolio
+    "portfolio_title": "💼 Investment Portfolio Recommendations:",
+    "portfolio_top_picks": "🎯 Top picks (top {}): {}",
+    "buy_recommendations": "🟢 Buy Recommendations ({} stocks):",
+    "hold_recommendations": "⚪ Hold Recommendations ({} stocks):",
+    "sell_recommendations": "🔴 Sell/Short Recommendations ({} stocks):",
+    "stock_score_confidence": "{} - Score: {}, Confidence: {}",
+    
+    # Multi-stock UI Messages
+    "stock_recommendation_results": "📈 Stock Recommendation Results",
+    "no_successful_analysis": "❌ No successful analysis results",
+    "short_recommendations": "🟡 Short Recommendations ({} stocks):",
+    "risk_stocks": "⚠️  High-risk stocks: {}",
+    "no_valid_stock_input": "❌ No valid stock input provided",
+    "input_parsing_warnings": "⚠️  Input parsing warnings:",
+    "no_valid_stock_symbols": "❌ No valid stock symbols found",
+    "parsing_summary": "📊 Successfully parsed {}/{} stocks",
+    "multi_stock_analysis_failed": "❌ Multi-stock analysis failed: {}",
+    "error_must_specify_stock": "Error: Must specify stock symbol or use multi-stock mode",
+    
+    # Input Parser Error Messages
+    "cannot_use_both_input": "Cannot use both command line and file input simultaneously",
+    "must_specify_input": "Must specify stock symbols or file path",
+    "command_line_limit_exceeded": "Command line input exceeds {} stocks, please use file input",
+    "file_not_found": "File does not exist: {}",
+    "unsupported_file_format": "Unsupported file format: {}",
+    "parsing_failed": "Input parsing failed: {}",
+    "file_parsing_failed": "Failed to parse file: {}",
+    "concurrent_manager_context_required": "ConcurrentManager must be used within a 'with' statement",
+    "task_execution_exception": "Task execution exception: {}"
 }

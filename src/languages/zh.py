@@ -92,6 +92,9 @@ TEXTS = {
     "help_language": "语言: en (英文) 或 zh (中文) (默认: en)",
     "help_description": "US Stock Recommendation System / 美股推荐系统",
     "help_strategy": "交易策略: technical (技术指标), quantitative (量化模型), ai (AI/机器学习), 或 all (全部) (默认: all)",
+    "help_single_stock_mode": "（单股票模式）",
+    "help_multi_stock_mode": "多股票模式：可选提供逗号分隔的股票代码（<5只），或配合--file使用",
+    "help_file_input": "股票列表文件路径（与--multi配合使用）",
     
     # 策略名称
     "strategy_technical": "技术指标分析",
@@ -145,5 +148,62 @@ TEXTS = {
     "strategy_consensus_mixed": "不同策略信号不一致",
     "strategy_weight_technical": "技术分析权重：{}%",
     "strategy_weight_quantitative": "量化模型权重：{}%", 
-    "strategy_weight_ai": "AI/机器学习权重：{}%"
+    "strategy_weight_ai": "AI/机器学习权重：{}%",
+    
+    # 批量分析
+    "batch_analysis_start": "🚀 开始批量股票分析...",
+    "batch_stock_count": "📊 股票数量: {}",
+    "batch_strategy": "📈 分析策略: {}",
+    "batch_period": "📅 数据周期: {}",
+    "batch_concurrent_config": "⚙️  并发配置: {}线程, {}s间隔",
+    "batch_analysis_complete": "📈 批量分析完成",
+    "batch_total_stocks": "📊 总股票数量: {}",
+    "batch_success_rate": "✅ 成功分析: {} ({:.1f}%)",
+    "batch_failed_count": "❌ 分析失败: {}",
+    "batch_total_time": "⏱️  总耗时: {}",
+    "batch_failed_details": "❌ 失败任务详情:",
+    "batch_avg_time": "📈 平均处理时间: {}",
+    "batch_analysis_summary": "📈 多股票分析完成总结",
+    
+    # 友好错误信息
+    "error_stock_not_exist_suggest": "{}: 股票代码不存在，您可能想输入 {}",
+    "error_acquired_by": "{}: {}",
+    "error_bank_closed": "{}: {}",
+    "error_stock_delisted": "{}: 股票可能已退市或代码无效",
+    "error_network_issue": "{}: 网络连接问题，请稍后重试",
+    
+    # 进度跟踪
+    "progress_calculating": "计算中...",
+    "progress_estimated_remaining": "预计剩余: {}",
+    
+    # 投资组合
+    "portfolio_title": "💼 投资组合建议:",
+    "portfolio_top_picks": "🎯 优选买入 (前{}只): {}",
+    "buy_recommendations": "🟢 买入推荐 ({}只):",
+    "hold_recommendations": "⚪ 持有推荐 ({}只):",
+    "sell_recommendations": "🔴 卖出推荐 ({}只):",
+    "stock_score_confidence": "{} - 得分: {}, 信心度: {}",
+    
+    # 多股票界面消息
+    "stock_recommendation_results": "📈 股票推荐结果",
+    "no_successful_analysis": "❌ 没有成功的分析结果",
+    "short_recommendations": "🟡 做空推荐 ({}只):",
+    "risk_stocks": "⚠️  风险股票: {}",
+    "no_valid_stock_input": "❌ 没有提供有效的股票输入",
+    "input_parsing_warnings": "⚠️  输入解析警告:",
+    "no_valid_stock_symbols": "❌ 没有找到有效的股票代码",
+    "parsing_summary": "📊 成功解析 {}/{} 只股票",
+    "multi_stock_analysis_failed": "❌ 多股票分析失败: {}",
+    "error_must_specify_stock": "错误：必须指定股票代码或使用多股票模式",
+    
+    # 输入解析器错误消息
+    "cannot_use_both_input": "不能同时使用命令行和文件输入",
+    "must_specify_input": "必须指定股票代码或文件路径",
+    "command_line_limit_exceeded": "命令行输入超过{}只股票，请使用文件输入",
+    "file_not_found": "文件不存在: {}",
+    "unsupported_file_format": "不支持的文件格式: {}",
+    "parsing_failed": "输入解析失败: {}",
+    "file_parsing_failed": "解析文件失败: {}",
+    "concurrent_manager_context_required": "ConcurrentManager必须在with语句中使用",
+    "task_execution_exception": "任务执行异常: {}"
 }

@@ -88,5 +88,7 @@ charts/
 *.pdf
 
 # Local documentation (contains sensitive setup info)
-docs/GITHUB_SECRETS_SETUP.md
+docs/temp/*
 PROJECT_CONTEXT.md
+IMPROVEMENT_PLAN.md
+MULTI_STOCK_SPEC.md

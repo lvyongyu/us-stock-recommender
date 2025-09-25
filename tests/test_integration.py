@@ -139,7 +139,7 @@ class TestSystemIntegration(unittest.TestCase):
             self.assertIn('recommendation', result)
             self.assertIn('action', result['recommendation'])
         except Exception as e:
-            # This is expected for empty data - test should pass
+            # This is expected for empty data - test should pass with Chinese message
             self.assertIn("请先获取股票数据", str(e))
     
     def test_different_time_periods_integration(self):
