@@ -242,9 +242,12 @@ stock recommander/
 ├── stock_recommender.py          # Main program entry
 ├── requirements.txt              # Dependencies list
 ├── setup.cfg                     # Project configuration
+├── pyproject.toml                # Project configuration and packaging info
 ├── run_ci_tests.sh              # CI test script
 ├── README.md                    # Project documentation (English)
 ├── README.zh.md                 # Chinese documentation
+├── LICENSE                      # MIT License
+├── .gitignore                   # Git ignore file
 ├── src/                         # Source code directory
 │   ├── __init__.py             # Package initialization
 │   ├── analyzers/              # Stock analyzer modules
@@ -260,6 +263,14 @@ stock recommander/
 │   │   ├── technical_strategy.py   # Technical analysis strategy
 │   │   ├── quantitative_strategy.py # Quantitative analysis strategy
 │   │   └── aiml_strategy.py    # AI/ML analysis strategy
+│   ├── batch/                  # Batch analysis modules 🆕
+│   │   ├── __init__.py
+│   │   ├── input_parser.py     # Multi-format input parser
+│   │   ├── batch_analyzer.py   # Batch stock analyzer
+│   │   ├── concurrent_manager.py # Concurrent processing manager
+│   │   ├── progress_tracker.py # Real-time progress tracker
+│   │   ├── sample_stocks.txt   # Sample stock list file
+│   │   └── sample_stocks.csv   # Sample stock CSV file
 │   ├── languages/              # Multi-language support modules
 │   │   ├── __init__.py
 │   │   ├── config.py          # Language configuration management
@@ -267,7 +278,8 @@ stock recommander/
 │   │   └── zh.py             # Chinese text resources
 │   └── utils/                  # Utility modules
 │       ├── __init__.py
-│       └── formatters.py      # Formatting utilities
+│       ├── formatters.py      # Formatting utilities
+│       └── symbol_config.py   # Stock symbol configuration and correction
 ├── tests/                      # Test suite
 │   ├── __init__.py
 │   ├── run_tests.py           # Test runner
@@ -276,9 +288,24 @@ stock recommander/
 │   ├── test_engines.py        # Engine tests
 │   ├── test_integration.py    # Integration tests
 │   ├── test_language_config.py # Language config tests
+│   ├── test_input_parser.py   # Input parser tests 🆕
+│   ├── test_multi_stock_integration.py # Multi-stock integration tests 🆕
 │   └── test_utils.py          # Test configuration and mock data
-└── .github/
-    └── copilot-instructions.md
+├── docs/                       # Documentation directory
+│   ├── README.md              # Documentation index
+│   ├── STRATEGY_ANALYSIS.md   # Strategy analysis documentation (Chinese)
+│   ├── STRATEGY_ANALYSIS_EN.md # Strategy analysis documentation (English)
+│   ├── PYPI_PUBLISHING_GUIDE.md # PyPI publishing guide
+│   └── RELEASE_CHECKLIST.md   # Release checklist
+├── scripts/                    # Scripts directory
+│   └── prepare_release.sh     # Release preparation script
+├── .github/                    # GitHub configuration
+│   ├── workflows/             # GitHub Actions workflows
+│   └── copilot-instructions.md # Copilot instructions configuration
+├── test_stocks.txt            # Test stock list
+├── test_500_stocks.txt        # Large stock list for testing
+├── test_error_handling.txt    # Error handling test list
+└── test_alpha_vantage.py      # Alpha Vantage API test script
 ```
 
 ## Core Architecture Design

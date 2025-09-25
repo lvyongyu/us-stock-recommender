@@ -215,9 +215,12 @@ stock recommander/
 ├── stock_recommender.py          # 主程序入口
 ├── requirements.txt              # 依赖包列表
 ├── setup.cfg                     # 项目配置
+├── pyproject.toml                # 项目配置和打包信息
 ├── run_ci_tests.sh              # CI测试脚本
 ├── README.md                    # 项目文档 (英文)
 ├── README.zh.md                 # 中文文档
+├── LICENSE                      # MIT许可证
+├── .gitignore                   # Git忽略文件
 ├── src/                         # 源代码目录
 │   ├── __init__.py             # 包初始化
 │   ├── analyzers/              # 股票分析器模块
@@ -233,6 +236,14 @@ stock recommander/
 │   │   ├── technical_strategy.py   # 技术分析策略
 │   │   ├── quantitative_strategy.py # 量化分析策略
 │   │   └── aiml_strategy.py    # AI/ML分析策略
+│   ├── batch/                  # 批量分析模块 🆕
+│   │   ├── __init__.py
+│   │   ├── input_parser.py     # 多格式输入解析器
+│   │   ├── batch_analyzer.py   # 批量股票分析器
+│   │   ├── concurrent_manager.py # 并发处理管理器
+│   │   ├── progress_tracker.py # 实时进度跟踪器
+│   │   ├── sample_stocks.txt   # 样本股票列表文件
+│   │   └── sample_stocks.csv   # 样本股票CSV文件
 │   ├── languages/              # 多语言支持模块
 │   │   ├── __init__.py
 │   │   ├── config.py          # 语言配置管理
@@ -240,7 +251,8 @@ stock recommander/
 │   │   └── zh.py             # 中文文本资源
 │   └── utils/                  # 工具模块
 │       ├── __init__.py
-│       └── formatters.py      # 格式化工具
+│       ├── formatters.py      # 格式化工具
+│       └── symbol_config.py   # 股票代码配置和纠错
 ├── tests/                      # 测试套件
 │   ├── __init__.py
 │   ├── run_tests.py           # 测试运行器
@@ -249,9 +261,24 @@ stock recommander/
 │   ├── test_engines.py        # 引擎测试
 │   ├── test_integration.py    # 集成测试
 │   ├── test_language_config.py # 语言配置测试
+│   ├── test_input_parser.py   # 输入解析器测试 🆕
+│   ├── test_multi_stock_integration.py # 多股票集成测试 🆕
 │   └── test_utils.py          # 测试配置和模拟数据
-└── .github/
-    └── copilot-instructions.md
+├── docs/                       # 文档目录
+│   ├── README.md              # 文档索引
+│   ├── STRATEGY_ANALYSIS.md   # 策略分析文档(中文)
+│   ├── STRATEGY_ANALYSIS_EN.md # 策略分析文档(英文)
+│   ├── PYPI_PUBLISHING_GUIDE.md # PyPI发布指南
+│   └── RELEASE_CHECKLIST.md   # 发布检查清单
+├── scripts/                    # 脚本目录
+│   └── prepare_release.sh     # 发布准备脚本
+├── .github/                    # GitHub配置
+│   ├── workflows/             # GitHub Actions工作流
+│   └── copilot-instructions.md # Copilot指令配置
+├── test_stocks.txt            # 测试用股票列表
+├── test_500_stocks.txt        # 大量股票测试列表
+├── test_error_handling.txt    # 错误处理测试列表
+└── test_alpha_vantage.py      # Alpha Vantage API测试脚本
 ```
 
 ## 核心架构设计
