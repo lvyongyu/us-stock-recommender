@@ -876,6 +876,88 @@ def show_portfolio_analysis():
         
         individual = analysis['individual_analysis']
         
+        # Create expandable detailed view
+        for symbol, stock_analysis in individual.items():
+            with st.expander(f"📊 {symbol} - Detailed Analysis", expanded=False):
+                col1, col2, col3 = st.columns(3)
+                
+                with col1:
+                    st.metric("Current Price", f"${stock_analysis.get('current_price', 'N/A'):.2f}" if stock_analysis.get('current_price') else "N/A")
+                    st.metric("Weight", f"{stock_analysis['weight']:.1%}")
+                    st.metric("Recommendation", stock_analysis['recommendation'])
+                
+                with col2:
+                    price_change = stock_analysis.get('price_change')
+                    price_change_pct = stock_analysis.get('price_change_pct')
+                    if price_change is not None:
+                        st.metric("Price Change", f"${price_change:+.2f}", delta=f"{price_change_pct:+.2f}%" if price_change_pct else None)
+                    else:
+                        st.metric("Price Change", "N/A")
+                    
+                    st.metric("Confidence", f"{stock_analysis['confidence']:.1%}")
+                    st.metric("Risk Score", f"{stock_analysis['risk_score']:.2f}")
+                
+                with col3:
+                    st.metric("Expected Return", f"{stock_analysis['expected_return']:.1%}")
+                    st.metric("Risk Level", stock_analysis.get('risk_level', 'Unknown'))
+                    st.metric("Strategy Used", stock_analysis.get('strategy_used', 'Unknown'))
+                
+                # Technical Indicators
+                st.subheader("📈 Technical Indicators")
+                key_metrics = stock_analysis.get('key_metrics', {})
+                
+                tech_col1, tech_col2, tech_col3, tech_col4 = st.columns(4)
+                
+                with tech_col1:
+                    rsi = key_metrics.get('RSI')
+                    st.metric("RSI", f"{rsi:.2f}" if rsi else "N/A")
+                
+                with tech_col2:
+                    macd = key_metrics.get('MACD')
+                    st.metric("MACD", f"{macd:.4f}" if macd else "N/A")
+                
+                with tech_col3:
+                    sma20 = key_metrics.get('SMA20')
+                    st.metric("SMA 20", f"${sma20:.2f}" if sma20 else "N/A")
+                
+                with tech_col4:
+                    sma50 = key_metrics.get('SMA50')
+                    st.metric("SMA 50", f"${sma50:.2f}" if sma50 else "N/A")
+                
+                # Trend, Momentum, Volume Analysis
+                st.subheader("📊 Market Analysis")
+                analysis_col1, analysis_col2, analysis_col3 = st.columns(3)
+                
+                with analysis_col1:
+                    trend = stock_analysis.get('trend', 'Unknown')
+                    st.metric("Trend", trend)
+                
+                with analysis_col2:
+                    momentum = stock_analysis.get('momentum', 'Unknown')
+                    st.metric("Momentum", momentum)
+                
+                with analysis_col3:
+                    volume = stock_analysis.get('volume', 'Unknown')
+                    st.metric("Volume", volume)
+                
+                # Individual strategy results if available
+                individual_strategies = stock_analysis.get('individual_strategies')
+                if individual_strategies:
+                    st.subheader("🎯 Strategy Breakdown")
+                    strategy_data = []
+                    for strategy_name, strategy_result in individual_strategies.items():
+                        strategy_data.append({
+                            'Strategy': strategy_name.title(),
+                            'Action': strategy_result.get('action', 'Unknown'),
+                            'Confidence': f"{strategy_result.get('confidence', 0):.1%}",
+                            'Score': f"{strategy_result.get('score', 0):.2f}"
+                        })
+                    
+                    if strategy_data:
+                        st.dataframe(pd.DataFrame(strategy_data), use_container_width=True)
+        
+        # Summary table for quick overview
+        st.subheader("📋 Quick Overview")
         stock_data = []
         for symbol, stock_analysis in individual.items():
             stock_data.append({
@@ -884,7 +966,8 @@ def show_portfolio_analysis():
                 'Recommendation': stock_analysis['recommendation'],
                 'Confidence': f"{stock_analysis['confidence']:.1%}",
                 'Risk Score': f"{stock_analysis['risk_score']:.2f}",
-                'Expected Return': f"{stock_analysis['expected_return']:.1%}"
+                'Expected Return': f"{stock_analysis['expected_return']:.1%}",
+                'Current Price': f"${stock_analysis.get('current_price', 0):.2f}" if stock_analysis.get('current_price') else "N/A"
             })
         
         if stock_data:
