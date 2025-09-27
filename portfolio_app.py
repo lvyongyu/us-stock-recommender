@@ -595,51 +595,40 @@ def show_portfolio_management():
                     
                     # Create expandable stock information cards
                     for holding in portfolio.holdings:
-                        stock_info = st.session_state.portfolio_stock_cache.get(holding.symbol)
-                        
-                        if stock_info:
-                            with st.expander(f"📈 {holding.symbol} - {stock_info['name']} Details"):
+                        expander_label = f"📈 {holding.symbol} Details"
+                        with st.expander(expander_label):
+                            stock_info = st.session_state.portfolio_stock_cache.get(holding.symbol)
+                            if not stock_info:
+                                with st.spinner(f"Getting {holding.symbol} information..."):
+                                    stock_manager = get_stock_manager()
+                                    stock_info = stock_manager.get_stock_info(holding.symbol)
+                                    if stock_info:
+                                        st.session_state.portfolio_stock_cache[holding.symbol] = stock_info
+                                    else:
+                                        st.error(f"Unable to retrieve {holding.symbol} information")
+                                        return
+                            if stock_info:
                                 col1, col2, col3 = st.columns(3)
-                                
                                 with col1:
                                     st.metric("Current Price", f"${stock_info['current_price']:.2f}" if stock_info.get('current_price') else "N/A")
                                     st.write(f"**Sector**: {stock_info.get('sector', 'Unknown')}")
                                     st.write(f"**Industry**: {stock_info.get('industry', 'Unknown')}")
-                                
                                 with col2:
                                     if stock_info.get('market_cap'):
                                         market_cap_b = stock_info['market_cap'] / 1e9
                                         st.metric("Market Cap", f"${market_cap_b:.1f}B")
                                     if stock_info.get('pe_ratio'):
                                         st.metric("P/E Ratio", f"{stock_info['pe_ratio']:.2f}")
-                                
                                 with col3:
                                     if stock_info.get('dividend_yield'):
                                         dividend_pct = stock_info['dividend_yield'] * 100
                                         st.metric("Dividend Yield", f"{dividend_pct:.2f}%")
                                     if stock_info.get('beta'):
                                         st.metric("Beta Coefficient", f"{stock_info['beta']:.2f}")
-                                
                                 if stock_info.get('description'):
                                     st.write("**Company Description**:")
                                     st.write(stock_info['description'])
-                                
-                                # Reserve space for future K-line chart functionality
                                 st.info("💡 K-line chart feature will be added in future versions")
-                        else:
-                            # If no cached information, provide button to fetch information
-                            with st.expander(f"📈 {holding.symbol} Details"):
-                                if st.button(f"Get {holding.symbol} Details", key=f"fetch_{holding.symbol}"):
-                                    with st.spinner(f"Getting {holding.symbol} information..."):
-                                        stock_manager = get_stock_manager()
-                                        stock_info = stock_manager.get_stock_info(holding.symbol)
-                                        
-                                        if stock_info:
-                                            st.session_state.portfolio_stock_cache[holding.symbol] = stock_info
-                                            st.success(f"Retrieved {holding.symbol} information!")
-                                            st.rerun()
-                                        else:
-                                            st.error(f"Unable to retrieve {holding.symbol} information")
                     
                     st.markdown("---")
                     
