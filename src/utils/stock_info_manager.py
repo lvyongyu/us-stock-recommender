@@ -101,7 +101,7 @@ class StockInfoManager:
             List of matching stocks
         """
         if not query or len(query.strip()) < 1:
-            return self.popular_stocks[:limit]
+            return []  # Return empty list when no search query
         
         query = query.upper().strip()
         matches = []

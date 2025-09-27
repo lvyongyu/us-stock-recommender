@@ -470,7 +470,7 @@ def show_portfolio_management():
                 # Add new stock
                 st.write("**Add New Stock**")
                 
-                # 使用动态股票选择器
+                # Use dynamic stock selector
                 selected_symbol, stock_info = create_dynamic_stock_selector(
                     key=f"add_stock_{selected_portfolio_name}",
                     placeholder="Search stock symbol or company name... (e.g. AAPL, Apple)",
@@ -561,12 +561,12 @@ def show_portfolio_management():
                 if portfolio.holdings:
                     st.write("**Current Holdings**")
                     
-                    # 创建扩展的持仓数据，包含缓存的股票信息
+                    # Create extended holdings data with cached stock information
                     holdings_data = []
                     for holding in portfolio.holdings:
                         deviation = holding.get_weight_deviation()
                         
-                        # 从缓存中获取股票信息
+                        # Get stock information from cache
                         stock_info = st.session_state.portfolio_stock_cache.get(holding.symbol)
                         current_price = stock_info.get('current_price') if stock_info else None
                         company_name = stock_info.get('name', holding.symbol) if stock_info else holding.symbol
@@ -586,56 +586,56 @@ def show_portfolio_management():
                     df_holdings = pd.DataFrame(holdings_data)
                     st.dataframe(df_holdings, use_container_width=True)
                     
-                    # 股票详细信息展示
+                    # Stock detailed information display
                     st.write("**📊 Detailed Portfolio Information**")
                     
-                    # 创建可展开的股票信息卡片
+                    # Create expandable stock information cards
                     for holding in portfolio.holdings:
                         stock_info = st.session_state.portfolio_stock_cache.get(holding.symbol)
                         
                         if stock_info:
-                            with st.expander(f"📈 {holding.symbol} - {stock_info['name']} 详细信息"):
+                            with st.expander(f"📈 {holding.symbol} - {stock_info['name']} Details"):
                                 col1, col2, col3 = st.columns(3)
                                 
                                 with col1:
-                                    st.metric("当前价格", f"${stock_info['current_price']:.2f}" if stock_info.get('current_price') else "N/A")
-                                    st.write(f"**行业**: {stock_info.get('sector', 'Unknown')}")
-                                    st.write(f"**子行业**: {stock_info.get('industry', 'Unknown')}")
+                                    st.metric("Current Price", f"${stock_info['current_price']:.2f}" if stock_info.get('current_price') else "N/A")
+                                    st.write(f"**Sector**: {stock_info.get('sector', 'Unknown')}")
+                                    st.write(f"**Industry**: {stock_info.get('industry', 'Unknown')}")
                                 
                                 with col2:
                                     if stock_info.get('market_cap'):
                                         market_cap_b = stock_info['market_cap'] / 1e9
-                                        st.metric("市值", f"${market_cap_b:.1f}B")
+                                        st.metric("Market Cap", f"${market_cap_b:.1f}B")
                                     if stock_info.get('pe_ratio'):
-                                        st.metric("P/E 比率", f"{stock_info['pe_ratio']:.2f}")
+                                        st.metric("P/E Ratio", f"{stock_info['pe_ratio']:.2f}")
                                 
                                 with col3:
                                     if stock_info.get('dividend_yield'):
                                         dividend_pct = stock_info['dividend_yield'] * 100
-                                        st.metric("股息收益率", f"{dividend_pct:.2f}%")
+                                        st.metric("Dividend Yield", f"{dividend_pct:.2f}%")
                                     if stock_info.get('beta'):
-                                        st.metric("贝塔系数", f"{stock_info['beta']:.2f}")
+                                        st.metric("Beta Coefficient", f"{stock_info['beta']:.2f}")
                                 
                                 if stock_info.get('description'):
-                                    st.write("**公司简介**:")
+                                    st.write("**Company Description**:")
                                     st.write(stock_info['description'])
                                 
-                                # 为将来的K线图预留位置
-                                st.info("💡 K线图功能将在未来版本中添加")
+                                # Reserve space for future K-line chart functionality
+                                st.info("💡 K-line chart feature will be added in future versions")
                         else:
-                            # 如果没有缓存信息，提供获取信息的按钮
-                            with st.expander(f"📈 {holding.symbol} 详细信息"):
-                                if st.button(f"获取 {holding.symbol} 详细信息", key=f"fetch_{holding.symbol}"):
-                                    with st.spinner(f"正在获取 {holding.symbol} 信息..."):
+                            # If no cached information, provide button to fetch information
+                            with st.expander(f"📈 {holding.symbol} Details"):
+                                if st.button(f"Get {holding.symbol} Details", key=f"fetch_{holding.symbol}"):
+                                    with st.spinner(f"Getting {holding.symbol} information..."):
                                         stock_manager = get_stock_manager()
                                         stock_info = stock_manager.get_stock_info(holding.symbol)
                                         
                                         if stock_info:
                                             st.session_state.portfolio_stock_cache[holding.symbol] = stock_info
-                                            st.success(f"已获取 {holding.symbol} 信息!")
+                                            st.success(f"Retrieved {holding.symbol} information!")
                                             st.rerun()
                                         else:
-                                            st.error(f"无法获取 {holding.symbol} 信息")
+                                            st.error(f"Unable to retrieve {holding.symbol} information")
                     
                     st.markdown("---")
                     
@@ -1154,12 +1154,12 @@ def show_settings():
         "Analysis Language",
         options=['en', 'zh'],
         index=0 if current_language == 'en' else 1,
-        format_func=lambda x: 'English' if x == 'en' else '中文'
+        format_func=lambda x: 'English' if x == 'en' else 'Chinese'
     )
     
     if new_language != current_language:
         st.session_state.portfolio_analyzer = PortfolioAnalyzer(language=new_language)
-        st.success(f"✅ Language changed to {'English' if new_language == 'en' else '中文'}")
+        st.success(f"✅ Language changed to {'English' if new_language == 'en' else 'Chinese'}")
         st.rerun()
     
     # Data management

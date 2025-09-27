@@ -54,9 +54,9 @@ def create_dynamic_stock_selector(
         # Execute search
         search_results = stock_manager.search_stocks(search_query, limit=15)
         st.session_state[f"{key}_results"] = search_results
-    elif not search_query:
-        # Show popular stocks
-        st.session_state[f"{key}_results"] = stock_manager.search_stocks("", limit=10)
+    else:
+        # Clear results when no search query
+        st.session_state[f"{key}_results"] = []
     
     # Display search results
     if st.session_state[f"{key}_results"]:
@@ -80,6 +80,9 @@ def create_dynamic_stock_selector(
                         with col:
                             # Create stock card
                             _create_stock_card(stock, key, stock_manager)
+    elif not search_query or len(search_query.strip()) == 0:
+        # Display hint when no search query
+        st.info("💡 **Tip**: Enter a stock symbol (e.g., AAPL, MSFT) or company name (e.g., Apple, Microsoft) to search for stocks.")
     
     # Display selected stock detailed information
     if st.session_state[f"{key}_selected"]:
