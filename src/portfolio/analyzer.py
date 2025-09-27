@@ -315,16 +315,27 @@ class PortfolioAnalyzer:
                 'current_price': stock_info.get('current_price'),
                 'price_change': 0.0,  # Mock price change for fallback
                 'price_change_pct': 0.0,  # Mock percentage change
+            })
+            
+            # Try to get market analysis data
+            market_analysis = self._get_market_analysis(symbol, stock_info)
+            result.update(market_analysis)
+        else:
+            # Default values when no stock info available
+            result.update({
+                'current_price': None,
+                'price_change': None,
+                'price_change_pct': None,
                 'trend': 'Unknown',
                 'momentum': 'Neutral',
                 'volume': 'Normal',
                 'risk_level': 'Medium',
                 'strategy_used': 'Fallback Analysis',
                 'key_metrics': {
-                    'RSI': 50.0,  # Neutral RSI
+                    'RSI': 50.0,
                     'MACD': 0.0,
-                    'SMA20': stock_info.get('current_price'),
-                    'SMA50': stock_info.get('current_price'),
+                    'SMA20': None,
+                    'SMA50': None,
                     'price_change': 0.0,
                     'volume_ratio': 1.0,
                     'volatility': risk_score
@@ -332,6 +343,126 @@ class PortfolioAnalyzer:
             })
         
         return result
+    
+    def _get_market_analysis(self, symbol: str, stock_info: Dict) -> Dict[str, Any]:
+        """Get market analysis data for a stock."""
+        try:
+            # Try to create stock analyzer and get metrics
+            if self.stock_analyzer_class:
+                analyzer = self.stock_analyzer_class(symbol)
+                analyzer.fetch_data()
+                metrics = analyzer.get_current_metrics()
+                
+                # Create recommendation engine for analysis
+                if self.recommendation_engine:
+                    trend = self.recommendation_engine._analyze_trend(metrics)
+                    momentum = self.recommendation_engine._analyze_momentum(metrics)
+                    volume = self.recommendation_engine._analyze_volume(metrics)
+                    risk_level = self.recommendation_engine._assess_risk(metrics)
+                else:
+                    # Fallback analysis without recommendation engine
+                    trend = self._analyze_trend_fallback(metrics)
+                    momentum = self._analyze_momentum_fallback(metrics)
+                    volume = self._analyze_volume_fallback(metrics)
+                    risk_level = "Medium"
+                
+                return {
+                    'trend': trend,
+                    'momentum': momentum,
+                    'volume': volume,
+                    'risk_level': risk_level,
+                    'strategy_used': 'Technical Analysis',
+                    'key_metrics': {
+                        'RSI': round(metrics.get('rsi', 50.0), 2),
+                        'MACD': round(metrics.get('macd', 0.0), 4),
+                        'SMA20': round(metrics.get('sma_20', 0.0), 2),
+                        'SMA50': round(metrics.get('sma_50', 0.0), 2),
+                        'price_change': round(metrics.get('price_change', 0.0), 2),
+                        'volume_ratio': round(metrics.get('volume', 0.0) / metrics.get('avg_volume', 1.0), 2),
+                        'volatility': 0.5  # Default volatility
+                    }
+                }
+        except Exception as e:
+            print(f"Warning: Could not perform market analysis for {symbol}: {e}")
+        
+        # Fallback when analysis fails
+        current_price = stock_info.get('current_price')
+        return {
+            'trend': 'Unknown',
+            'momentum': 'Neutral',
+            'volume': 'Normal',
+            'risk_level': 'Medium',
+            'strategy_used': 'Basic Analysis',
+            'key_metrics': {
+                'RSI': 50.0,
+                'MACD': 0.0,
+                'SMA20': current_price,
+                'SMA50': current_price,
+                'price_change': 0.0,
+                'volume_ratio': 1.0,
+                'volatility': 0.5
+            }
+        }
+    
+    def _analyze_trend_fallback(self, metrics: Dict) -> str:
+        """Fallback trend analysis when recommendation engine unavailable."""
+        try:
+            current_price = metrics.get('current_price', 0)
+            sma_20 = metrics.get('sma_20', current_price)
+            sma_50 = metrics.get('sma_50', current_price)
+            
+            if current_price > sma_20 > sma_50:
+                return "Uptrend"
+            elif current_price < sma_20 < sma_50:
+                return "Downtrend"
+            else:
+                return "Sideways"
+        except:
+            return "Unknown"
+    
+    def _analyze_momentum_fallback(self, metrics: Dict) -> str:
+        """Fallback momentum analysis when recommendation engine unavailable."""
+        try:
+            rsi = metrics.get('rsi', 50)
+            macd = metrics.get('macd', 0)
+            macd_signal = metrics.get('macd_signal', 0)
+            
+            signals = []
+            
+            if rsi > 70:
+                signals.append("Overbought")
+            elif rsi < 30:
+                signals.append("Oversold")
+            else:
+                signals.append("Neutral RSI")
+                
+            if macd > macd_signal:
+                signals.append("Bullish MACD")
+            else:
+                signals.append("Bearish MACD")
+            
+            return " | ".join(signals)
+        except:
+            return "Neutral"
+    
+    def _analyze_volume_fallback(self, metrics: Dict) -> str:
+        """Fallback volume analysis when recommendation engine unavailable."""
+        try:
+            current_volume = metrics.get('volume', 0)
+            avg_volume = metrics.get('avg_volume', 1)
+            
+            if avg_volume > 0:
+                volume_ratio = current_volume / avg_volume
+                
+                if volume_ratio > 1.5:
+                    return "High Volume"
+                elif volume_ratio < 0.5:
+                    return "Low Volume"
+                else:
+                    return "Normal Volume"
+        except:
+            pass
+        return "Normal"
     
     def _calculate_portfolio_metrics(self, portfolio: Portfolio, 
                                    individual_analysis: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
