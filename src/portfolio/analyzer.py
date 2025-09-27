@@ -160,7 +160,7 @@ class PortfolioAnalyzer:
                 raise InsufficientDataError("portfolio holdings", 1)
             
             # Analyze individual stocks
-            individual_analysis = self._analyze_individual_stocks(portfolio)
+            individual_analysis = self._analyze_individual_stocks(portfolio, force_refresh)
             
             # Calculate portfolio-level metrics
             portfolio_metrics = self._calculate_portfolio_metrics(portfolio, individual_analysis)
@@ -202,7 +202,7 @@ class PortfolioAnalyzer:
         except Exception as e:
             raise AnalysisError("portfolio analysis", str(e))
     
-    def _analyze_individual_stocks(self, portfolio: Portfolio) -> Dict[str, Dict[str, Any]]:
+    def _analyze_individual_stocks(self, portfolio: Portfolio, force_refresh: bool = False) -> Dict[str, Dict[str, Any]]:
         """Analyze individual stocks in the portfolio."""
         individual_analysis = {}
         
@@ -221,13 +221,13 @@ class PortfolioAnalyzer:
                         )
                     else:
                         # Fallback for failed analysis
-                        individual_analysis[symbol] = self._create_fallback_analysis(holding)
+                        individual_analysis[symbol] = self._create_fallback_analysis(holding, force_refresh)
                         
             except Exception as e:
                 print(f"Warning: Batch analysis failed: {e}")
                 # Fallback to individual analysis or mock data
                 for holding in portfolio.holdings:
-                    individual_analysis[holding.symbol] = self._create_fallback_analysis(holding)
+                    individual_analysis[holding.symbol] = self._create_fallback_analysis(holding, force_refresh)
         else:
             # Analyze stocks individually or use fallback
             for holding in portfolio.holdings:
@@ -236,12 +236,12 @@ class PortfolioAnalyzer:
                         # This would call the actual stock analyzer
                         # analysis_result = self.stock_analyzer.analyze_stock(holding.symbol)
                         # For now, create fallback analysis
-                        individual_analysis[holding.symbol] = self._create_fallback_analysis(holding)
+                        individual_analysis[holding.symbol] = self._create_fallback_analysis(holding, force_refresh)
                     except Exception as e:
                         print(f"Warning: Failed to analyze {holding.symbol}: {e}")
-                        individual_analysis[holding.symbol] = self._create_fallback_analysis(holding)
+                        individual_analysis[holding.symbol] = self._create_fallback_analysis(holding, force_refresh)
                 else:
-                    individual_analysis[holding.symbol] = self._create_fallback_analysis(holding)
+                    individual_analysis[holding.symbol] = self._create_fallback_analysis(holding, force_refresh)
         
         return individual_analysis
     
@@ -261,7 +261,7 @@ class PortfolioAnalyzer:
             'notes': holding.notes
         }
     
-    def _create_fallback_analysis(self, holding: Holding) -> Dict[str, Any]:
+    def _create_fallback_analysis(self, holding: Holding, force_refresh: bool = False) -> Dict[str, Any]:
         """Create fallback analysis when real analysis unavailable."""
         symbol = holding.symbol
         
@@ -269,7 +269,7 @@ class PortfolioAnalyzer:
         stock_info = None
         try:
             if self.stock_manager:
-                stock_info = self.stock_manager.get_stock_info(symbol)
+                stock_info = self.stock_manager.get_stock_info(symbol, force_refresh=force_refresh)
         except Exception as e:
             print(f"Warning: Could not get stock info for {symbol}: {e}")
         
@@ -313,8 +313,8 @@ class PortfolioAnalyzer:
         if stock_info:
             result.update({
                 'current_price': stock_info.get('current_price'),
-                'price_change': 0.0,  # Mock price change for fallback
-                'price_change_pct': 0.0,  # Mock percentage change
+                'price_change': stock_info.get('price_change', 0.0),
+                'price_change_pct': stock_info.get('price_change_pct', 0.0),
             })
             
             # Try to get market analysis data

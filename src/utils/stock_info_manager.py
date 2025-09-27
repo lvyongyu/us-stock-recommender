@@ -68,19 +68,20 @@ class StockInfoManager:
         
         return []
     
-    def get_stock_info(self, symbol: str) -> Optional[Dict]:
+    def get_stock_info(self, symbol: str, force_refresh: bool = False) -> Optional[Dict]:
         """
         Get detailed stock information
         Args:
             symbol: Stock symbol
+            force_refresh: Whether to ignore cache
         Returns:
             Stock information dictionary
         """
         symbol = symbol.upper().strip()
         
-        # Check cache
+        # Check cache (unless force refresh)
         cache_key = f"{symbol}_{datetime.now().strftime('%Y-%m-%d')}"
-        if cache_key in self.stock_info_cache:
+        if not force_refresh and cache_key in self.stock_info_cache:
             return self.stock_info_cache[cache_key]
         
         try:
@@ -88,9 +89,21 @@ class StockInfoManager:
             ticker = yf.Ticker(symbol)
             info = ticker.info
             
-            # Get historical data for current price calculation
-            hist = ticker.history(period="1d")
+            # Get historical data for current price and change calculation
+            hist = ticker.history(period="2d")  # Get 2 days to calculate change
             current_price = hist['Close'].iloc[-1] if not hist.empty else None
+            
+            # Calculate price change if we have at least 2 days of data
+            price_change = None
+            price_change_pct = None
+            volume = None
+            
+            if not hist.empty and len(hist) >= 2:
+                current_price = hist['Close'].iloc[-1]
+                previous_price = hist['Close'].iloc[-2]
+                price_change = float(current_price - previous_price)
+                price_change_pct = float(((current_price - previous_price) / previous_price) * 100)
+                volume = int(hist['Volume'].iloc[-1]) if 'Volume' in hist.columns else None
             
             stock_info = {
                 "symbol": symbol,
@@ -98,6 +111,9 @@ class StockInfoManager:
                 "sector": info.get("sector", "Unknown"),
                 "industry": info.get("industry", "Unknown"),
                 "current_price": float(current_price) if current_price else None,
+                "price_change": price_change,
+                "price_change_pct": price_change_pct,
+                "volume": volume,
                 "currency": info.get("currency", "USD"),
                 "market_cap": info.get("marketCap", None),
                 "pe_ratio": info.get("forwardPE", None),
