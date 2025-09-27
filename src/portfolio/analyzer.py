@@ -95,9 +95,10 @@ class PortfolioAnalyzer:
     
     def _initialize_fallback_analyzers(self):
         """Initialize fallback analyzers when main components unavailable."""
-        self.stock_analyzer = None
+        self.stock_analyzer_class = None
         self.recommendation_engine = None
         self.batch_analyzer = None
+        self.stock_manager = None
         self.lang_config = self._get_fallback_language_config()
     
     def _get_fallback_language_config(self) -> Dict[str, str]:
@@ -230,7 +231,7 @@ class PortfolioAnalyzer:
         else:
             # Analyze stocks individually or use fallback
             for holding in portfolio.holdings:
-                if self.stock_analyzer:
+                if self.stock_analyzer_class:
                     try:
                         # This would call the actual stock analyzer
                         # analysis_result = self.stock_analyzer.analyze_stock(holding.symbol)
@@ -661,7 +662,7 @@ class PortfolioAnalyzer:
         portfolio.analysis_cache.analysis_details = {
             'risk_score': analysis_results['portfolio_metrics']['risk_score'],
             'holdings_analyzed': len(analysis_results['individual_analysis']),
-            'analysis_method': 'integrated' if self.stock_analyzer else 'fallback'
+            'analysis_method': 'integrated' if self.stock_analyzer_class else 'fallback'
         }
         
         portfolio.last_analysis_time = datetime.now()
