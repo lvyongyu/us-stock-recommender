@@ -30,11 +30,13 @@ try:
     from src.engines.recommendation_engine import RecommendationEngine  
     from src.batch.batch_analyzer import BatchAnalyzer
     from src.languages.config import get_language_config
+    from src.utils.stock_info_manager import get_stock_manager
 except ImportError as e:
     print(f"Warning: Could not import existing analysis components: {e}")
     StockAnalyzer = None
     RecommendationEngine = None
     BatchAnalyzer = None
+    get_stock_manager = None
 
 
 class PortfolioAnalyzer:
@@ -52,12 +54,22 @@ class PortfolioAnalyzer:
         # Initialize existing analysis components if available
         try:
             if StockAnalyzer:
-                self.stock_analyzer = StockAnalyzer()
+                self.stock_analyzer_class = StockAnalyzer
             else:
-                self.stock_analyzer = None
+                self.stock_analyzer_class = None
                 
             if RecommendationEngine:
-                self.recommendation_engine = RecommendationEngine(language)
+                # Get language configuration first
+                try:
+                    lang_config = get_language_config(language)
+                except:
+                    lang_config = self._get_fallback_language_config()
+                
+                # Create recommendation engine with proper parameters
+                self.recommendation_engine = RecommendationEngine(
+                    analyzer=None,  # Will be set per stock
+                    lang_config=lang_config
+                )
             else:
                 self.recommendation_engine = None
                 
@@ -65,6 +77,11 @@ class PortfolioAnalyzer:
                 self.batch_analyzer = BatchAnalyzer()
             else:
                 self.batch_analyzer = None
+                
+            if get_stock_manager:
+                self.stock_manager = get_stock_manager()
+            else:
+                self.stock_manager = None
                 
             # Get language configuration
             try:
@@ -245,8 +262,15 @@ class PortfolioAnalyzer:
     
     def _create_fallback_analysis(self, holding: Holding) -> Dict[str, Any]:
         """Create fallback analysis when real analysis unavailable."""
-        # Simple mock analysis based on symbol patterns
         symbol = holding.symbol
+        
+        # Try to get basic stock information from stock manager
+        stock_info = None
+        try:
+            if self.stock_manager:
+                stock_info = self.stock_manager.get_stock_info(symbol)
+        except Exception as e:
+            print(f"Warning: Could not get stock info for {symbol}: {e}")
         
         # Mock recommendation based on symbol patterns
         if any(tech in symbol for tech in ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'TSLA']):
@@ -265,7 +289,8 @@ class PortfolioAnalyzer:
             risk_score = 0.5
             expected_return = 0.07
         
-        return {
+        # Create base result
+        result = {
             'symbol': symbol,
             'weight': holding.weight,
             'target_weight': holding.target_weight,
@@ -282,6 +307,30 @@ class PortfolioAnalyzer:
             'notes': holding.notes,
             'is_mock_data': True
         }
+        
+        # Add stock information if available
+        if stock_info:
+            result.update({
+                'current_price': stock_info.get('current_price'),
+                'price_change': 0.0,  # Mock price change for fallback
+                'price_change_pct': 0.0,  # Mock percentage change
+                'trend': 'Unknown',
+                'momentum': 'Neutral',
+                'volume': 'Normal',
+                'risk_level': 'Medium',
+                'strategy_used': 'Fallback Analysis',
+                'key_metrics': {
+                    'RSI': 50.0,  # Neutral RSI
+                    'MACD': 0.0,
+                    'SMA20': stock_info.get('current_price'),
+                    'SMA50': stock_info.get('current_price'),
+                    'price_change': 0.0,
+                    'volume_ratio': 1.0,
+                    'volatility': risk_score
+                }
+            })
+        
+        return result
     
     def _calculate_portfolio_metrics(self, portfolio: Portfolio, 
                                    individual_analysis: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
