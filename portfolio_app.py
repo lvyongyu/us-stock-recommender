@@ -321,14 +321,18 @@ def show_dashboard():
     for portfolio in portfolios[:5]:  # Show top 5 portfolios
         try:
             analysis = analyzer.analyze_portfolio(portfolio)
+            expected_return = analysis.get('portfolio_metrics', {}).get('expected_return', 0)
+            risk_level = analysis.get('risk_assessment', {}).get('risk_level', 'Unknown')
+            recommendation = analysis.get('overall_recommendation', {}).get('recommendation', 'N/A')
+            
             portfolio_data.append({
                 'Name': portfolio.name,
                 'Strategy': portfolio.strategy_type.value.title(),
                 'Holdings': len(portfolio.holdings),
                 'Total Weight': f"{portfolio.total_weight:.1%}",
-                'Expected Return': f"{analysis['portfolio_metrics']['expected_return']:.1%}",
-                'Risk Level': analysis['risk_assessment']['risk_level'],
-                'Recommendation': analysis['overall_recommendation']['recommendation']
+                'Expected Return': f"{expected_return:.1%}" if expected_return is not None else "N/A",
+                'Risk Level': risk_level,
+                'Recommendation': recommendation
             })
         except Exception as e:
             portfolio_data.append({
@@ -1113,11 +1117,35 @@ def show_portfolio_comparison():
             value2 = analysis2[category][key]
             
             if format_str:
-                value1_str = f"{value1:{format_str}}"
-                value2_str = f"{value2:{format_str}}"
+                # Handle None values and ensure proper numeric formatting
+                try:
+                    if value1 is not None and isinstance(value1, (int, float)):
+                        if format_str == ':.1%':
+                            value1_str = f"{value1:.1%}"
+                        elif format_str == ':.2f':
+                            value1_str = f"{value1:.2f}"
+                        else:
+                            value1_str = format(value1, format_str.lstrip(':'))
+                    else:
+                        value1_str = "N/A"
+                except (ValueError, TypeError):
+                    value1_str = "N/A"
+                
+                try:
+                    if value2 is not None and isinstance(value2, (int, float)):
+                        if format_str == ':.1%':
+                            value2_str = f"{value2:.1%}"
+                        elif format_str == ':.2f':
+                            value2_str = f"{value2:.2f}"
+                        else:
+                            value2_str = format(value2, format_str.lstrip(':'))
+                    else:
+                        value2_str = "N/A"
+                except (ValueError, TypeError):
+                    value2_str = "N/A"
             else:
-                value1_str = str(value1)
-                value2_str = str(value2)
+                value1_str = str(value1) if value1 is not None else "N/A"
+                value2_str = str(value2) if value2 is not None else "N/A"
             
             comparison_data.append({
                 'Metric': metric_name,
