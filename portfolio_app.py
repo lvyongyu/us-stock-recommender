@@ -40,33 +40,20 @@ except ImportError as e:
 
 # Page configuration
 st.set_page_config(
-    page_title="US Stock Recommender - Portfolio Manager",
+    page_title="Portfolio Manager",
     page_icon="📊",
     layout="wide",
-    initial_sidebar_state="expanded",
-    menu_items={
-        'Get Help': 'https://github.com/lvyongyu/us-stock-recommender',
-        'Report a bug': 'https://github.com/lvyongyu/us-stock-recommender/issues',
-        'About': "# US Stock Recommender\nA comprehensive stock analysis and portfolio management system"
-    }
+    initial_sidebar_state="expanded"
 )
 
-# Custom CSS for better styling and Safari compatibility
+# Custom CSS for better styling
 st.markdown("""
 <style>
-    /* Safari compatibility improvements */
-    * {
-        -webkit-box-sizing: border-box;
-        -moz-box-sizing: border-box;
-        box-sizing: border-box;
-    }
-    
     .main-header {
         font-size: 2.5rem;
         color: #1f77b4;
         text-align: center;
         margin-bottom: 2rem;
-        -webkit-font-smoothing: antialiased;
     }
     
     .metric-card {
@@ -74,8 +61,6 @@ st.markdown("""
         padding: 1rem;
         border-radius: 0.5rem;
         border-left: 4px solid #1f77b4;
-        -webkit-border-radius: 0.5rem;
-        -moz-border-radius: 0.5rem;
     }
     
     .success-alert {
@@ -84,8 +69,6 @@ st.markdown("""
         padding: 0.75rem;
         border-radius: 0.25rem;
         border: 1px solid #c3e6cb;
-        -webkit-border-radius: 0.25rem;
-        -moz-border-radius: 0.25rem;
     }
     
     .warning-alert {
@@ -94,8 +77,6 @@ st.markdown("""
         padding: 0.75rem;
         border-radius: 0.25rem;
         border: 1px solid #ffeaa7;
-        -webkit-border-radius: 0.25rem;
-        -moz-border-radius: 0.25rem;
     }
     
     .error-alert {
@@ -104,26 +85,6 @@ st.markdown("""
         padding: 0.75rem;
         border-radius: 0.25rem;
         border: 1px solid #f5c6cb;
-        -webkit-border-radius: 0.25rem;
-        -moz-border-radius: 0.25rem;
-    }
-    
-    /* Safari specific fixes */
-    @media screen and (-webkit-min-device-pixel-ratio:0) {
-        select {
-            -webkit-appearance: none;
-            appearance: none;
-        }
-        
-        input[type="text"], input[type="number"] {
-            -webkit-appearance: none;
-            -webkit-border-radius: 0;
-        }
-        
-        button {
-            -webkit-appearance: none;
-            -webkit-border-radius: 0;
-        }
     }
 </style>
 """, unsafe_allow_html=True)
@@ -137,22 +98,6 @@ def init_session_state():
     
     if 'portfolio_analyzer' not in st.session_state:
         st.session_state.portfolio_analyzer = PortfolioAnalyzer(language='en')
-    
-    # Safari compatibility check
-    if 'browser_checked' not in st.session_state:
-        st.session_state.browser_checked = True
-        # Add browser compatibility notice
-        st.markdown("""
-        <div style="background-color: #e3f2fd; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem; border-left: 4px solid #2196f3;">
-            <h4 style="color: #1565c0; margin: 0 0 0.5rem 0;">🌐 浏览器兼容性提示</h4>
-            <p style="margin: 0; color: #1565c0;">
-                如果在 Safari 中遇到访问问题，建议：<br>
-                • 清除 Safari 缓存和网站数据<br>
-                • 禁用内容阻止器和广告拦截器<br>
-                • 或使用 Chrome/Firefox 获得最佳体验
-            </p>
-        </div>
-        """, unsafe_allow_html=True)
     
     if 'selected_portfolio' not in st.session_state:
         st.session_state.selected_portfolio = None
