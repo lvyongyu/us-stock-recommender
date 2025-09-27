@@ -33,6 +33,8 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 try:
     from src.portfolio import PortfolioManager, PortfolioAnalyzer, StrategyType
     from src.portfolio.exceptions import PortfolioError
+    from src.utils.stock_selector import create_dynamic_stock_selector, create_stock_weight_input
+    from src.utils.stock_info_manager import get_stock_manager
 except ImportError as e:
     st.error(f"Failed to import portfolio components: {e}")
     st.stop()
@@ -104,6 +106,14 @@ def init_session_state():
     
     if 'analysis_cache' not in st.session_state:
         st.session_state.analysis_cache = {}
+    
+    # 初始化股票信息缓存，为将来的K线等功能做准备
+    if 'portfolio_stock_cache' not in st.session_state:
+        st.session_state.portfolio_stock_cache = {}
+    
+    # 初始化股票管理器缓存
+    if 'stock_manager' not in st.session_state:
+        st.session_state.stock_manager = get_stock_manager()
 
 
 # Utility functions
@@ -458,53 +468,115 @@ def show_portfolio_management():
                 st.write("**Manage Holdings**")
                 
                 # Add new stock
-                with st.form("add_stock"):
-                    st.write("Add New Stock")
+                st.write("**Add New Stock**")
+                
+                # 使用动态股票选择器
+                selected_symbol, stock_info = create_dynamic_stock_selector(
+                    key=f"add_stock_{selected_portfolio_name}",
+                    placeholder="搜索股票代码或公司名称... (例如: AAPL, Apple)",
+                    help_text="输入股票代码或公司名称进行实时搜索"
+                )
+                
+                # 如果选中了股票，显示权重设置和添加按钮
+                if selected_symbol and stock_info:
+                    st.markdown("---")
                     
-                    col1, col2, col3, col4 = st.columns(4)
-                    
-                    with col1:
-                        stock_symbol = st.text_input("Symbol", placeholder="e.g., AAPL").upper()
-                    
-                    with col2:
-                        weight = st.number_input("Weight (%)", min_value=0.0, max_value=100.0, value=10.0, step=0.1)
-                    
-                    with col3:
-                        target_weight = st.number_input("Target Weight (%)", min_value=0.0, max_value=100.0, value=weight, step=0.1)
-                    
-                    with col4:
-                        st.write("")  # Spacing
-                        st.write("")  # Spacing
-                        add_stock = st.form_submit_button("Add Stock")
-                    
-                    notes = st.text_input("Notes (optional)", placeholder="Investment thesis or notes...")
-                    
-                    if add_stock:
-                        if stock_symbol:
+                    with st.form(f"add_stock_form_{selected_symbol}"):
+                        st.markdown(f"### 🎯 添加 **{selected_symbol}** 到投资组合")
+                        
+                        col1, col2 = st.columns(2)
+                        
+                        with col1:
+                            weight = st.number_input(
+                                "权重 (%)", 
+                                min_value=0.1, 
+                                max_value=100.0, 
+                                value=10.0, 
+                                step=0.1,
+                                help="该股票在投资组合中的权重百分比"
+                            )
+                        
+                        with col2:
+                            target_weight = st.number_input(
+                                "目标权重 (%)", 
+                                min_value=0.1, 
+                                max_value=100.0, 
+                                value=weight, 
+                                step=0.1,
+                                help="理想的目标权重（可选）"
+                            )
+                        
+                        notes = st.text_area(
+                            "投资备注 (可选)", 
+                            placeholder="记录投资理由或相关分析...",
+                            help="可以记录选择这只股票的原因"
+                        )
+                        
+                        # 显示当前股票价格信息
+                        if stock_info.get("current_price"):
+                            st.info(f"💰 当前价格: ${stock_info['current_price']:.2f} | "
+                                   f"📊 权重: {weight}% | "
+                                   f"🏢 行业: {stock_info.get('sector', 'Unknown')}")
+                        
+                        col1, col2, col3 = st.columns([1, 1, 1])
+                        
+                        with col2:
+                            add_stock_submit = st.form_submit_button(
+                                f"✅ 添加 {selected_symbol}", 
+                                help=f"将 {selected_symbol} 添加到投资组合中",
+                                use_container_width=True
+                            )
+                        
+                        if add_stock_submit:
                             try:
+                                # 保存股票信息到缓存（为将来的K线等功能做准备）
+                                if 'portfolio_stock_cache' not in st.session_state:
+                                    st.session_state.portfolio_stock_cache = {}
+                                st.session_state.portfolio_stock_cache[selected_symbol] = stock_info
+                                
+                                # 添加股票到投资组合
                                 manager.add_stock(
                                     selected_portfolio_name,
-                                    stock_symbol,
+                                    selected_symbol,
                                     weight / 100,
                                     target_weight=target_weight / 100 if target_weight != weight else None,
                                     notes=notes if notes else None
                                 )
-                                st.success(f"✅ Added {stock_symbol} to portfolio!")
+                                
+                                st.success(f"🎉 成功添加 {selected_symbol} ({stock_info['name']}) 到投资组合!")
+                                st.balloons()  # 添加一些庆祝效果
+                                
+                                # 清理选择状态，准备添加下一个股票
+                                if f"add_stock_{selected_portfolio_name}_selected" in st.session_state:
+                                    del st.session_state[f"add_stock_{selected_portfolio_name}_selected"]
+                                
                                 st.rerun()
+                                
                             except Exception as e:
-                                st.error(f"❌ Error adding stock: {e}")
-                        else:
-                            st.warning("⚠️ Please provide a stock symbol.")
+                                st.error(f"❌ 添加股票时出错: {e}")
+                else:
+                    st.info("👆 请先搜索并选择要添加的股票")
                 
                 # Current holdings
                 if portfolio.holdings:
                     st.write("**Current Holdings**")
                     
+                    # 创建扩展的持仓数据，包含缓存的股票信息
                     holdings_data = []
                     for holding in portfolio.holdings:
                         deviation = holding.get_weight_deviation()
+                        
+                        # 从缓存中获取股票信息
+                        stock_info = st.session_state.portfolio_stock_cache.get(holding.symbol)
+                        current_price = stock_info.get('current_price') if stock_info else None
+                        company_name = stock_info.get('name', holding.symbol) if stock_info else holding.symbol
+                        sector = stock_info.get('sector', 'Unknown') if stock_info else 'Unknown'
+                        
                         holdings_data.append({
                             'Symbol': holding.symbol,
+                            'Company': company_name,
+                            'Sector': sector,
+                            'Current Price': f"${current_price:.2f}" if current_price else "N/A",
                             'Weight': f"{holding.weight:.1%}",
                             'Target Weight': f"{holding.target_weight:.1%}" if holding.target_weight else "N/A",
                             'Deviation': f"{deviation:+.1%}" if deviation else "N/A",
@@ -513,6 +585,59 @@ def show_portfolio_management():
                     
                     df_holdings = pd.DataFrame(holdings_data)
                     st.dataframe(df_holdings, use_container_width=True)
+                    
+                    # 股票详细信息展示
+                    st.write("**📊 持仓股票详细信息**")
+                    
+                    # 创建可展开的股票信息卡片
+                    for holding in portfolio.holdings:
+                        stock_info = st.session_state.portfolio_stock_cache.get(holding.symbol)
+                        
+                        if stock_info:
+                            with st.expander(f"📈 {holding.symbol} - {stock_info['name']} 详细信息"):
+                                col1, col2, col3 = st.columns(3)
+                                
+                                with col1:
+                                    st.metric("当前价格", f"${stock_info['current_price']:.2f}" if stock_info.get('current_price') else "N/A")
+                                    st.write(f"**行业**: {stock_info.get('sector', 'Unknown')}")
+                                    st.write(f"**子行业**: {stock_info.get('industry', 'Unknown')}")
+                                
+                                with col2:
+                                    if stock_info.get('market_cap'):
+                                        market_cap_b = stock_info['market_cap'] / 1e9
+                                        st.metric("市值", f"${market_cap_b:.1f}B")
+                                    if stock_info.get('pe_ratio'):
+                                        st.metric("P/E 比率", f"{stock_info['pe_ratio']:.2f}")
+                                
+                                with col3:
+                                    if stock_info.get('dividend_yield'):
+                                        dividend_pct = stock_info['dividend_yield'] * 100
+                                        st.metric("股息收益率", f"{dividend_pct:.2f}%")
+                                    if stock_info.get('beta'):
+                                        st.metric("贝塔系数", f"{stock_info['beta']:.2f}")
+                                
+                                if stock_info.get('description'):
+                                    st.write("**公司简介**:")
+                                    st.write(stock_info['description'])
+                                
+                                # 为将来的K线图预留位置
+                                st.info("💡 K线图功能将在未来版本中添加")
+                        else:
+                            # 如果没有缓存信息，提供获取信息的按钮
+                            with st.expander(f"📈 {holding.symbol} 详细信息"):
+                                if st.button(f"获取 {holding.symbol} 详细信息", key=f"fetch_{holding.symbol}"):
+                                    with st.spinner(f"正在获取 {holding.symbol} 信息..."):
+                                        stock_manager = get_stock_manager()
+                                        stock_info = stock_manager.get_stock_info(holding.symbol)
+                                        
+                                        if stock_info:
+                                            st.session_state.portfolio_stock_cache[holding.symbol] = stock_info
+                                            st.success(f"已获取 {holding.symbol} 信息!")
+                                            st.rerun()
+                                        else:
+                                            st.error(f"无法获取 {holding.symbol} 信息")
+                    
+                    st.markdown("---")
                     
                     # Remove stock functionality
                     col1, col2 = st.columns([3, 1])
