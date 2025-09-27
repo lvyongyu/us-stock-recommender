@@ -16,7 +16,6 @@ class StockInfoManager:
     def __init__(self):
         self.stock_cache_file = os.path.expanduser("~/.stock_recommender/stock_info_cache.json")
         self.ensure_cache_dir()
-        self.popular_stocks = self._get_popular_stocks()
         self.stock_info_cache = self._load_cache()
     
     def ensure_cache_dir(self):
@@ -24,54 +23,6 @@ class StockInfoManager:
         cache_dir = os.path.dirname(self.stock_cache_file)
         if not os.path.exists(cache_dir):
             os.makedirs(cache_dir, exist_ok=True)
-    
-    def _get_popular_stocks(self) -> List[Dict]:
-        """Get popular stocks list"""
-        return [
-            # Technology stocks
-            {"symbol": "AAPL", "name": "Apple Inc.", "sector": "Technology"},
-            {"symbol": "MSFT", "name": "Microsoft Corporation", "sector": "Technology"},
-            {"symbol": "GOOGL", "name": "Alphabet Inc.", "sector": "Technology"},
-            {"symbol": "AMZN", "name": "Amazon.com Inc.", "sector": "Technology"},
-            {"symbol": "NVDA", "name": "NVIDIA Corporation", "sector": "Technology"},
-            {"symbol": "META", "name": "Meta Platforms Inc.", "sector": "Technology"},
-            {"symbol": "TSLA", "name": "Tesla Inc.", "sector": "Technology"},
-            {"symbol": "NFLX", "name": "Netflix Inc.", "sector": "Technology"},
-            {"symbol": "ADBE", "name": "Adobe Inc.", "sector": "Technology"},
-            {"symbol": "CRM", "name": "Salesforce Inc.", "sector": "Technology"},
-            
-            # Financial stocks
-            {"symbol": "JPM", "name": "JPMorgan Chase & Co.", "sector": "Financial"},
-            {"symbol": "BAC", "name": "Bank of America Corp.", "sector": "Financial"},
-            {"symbol": "WFC", "name": "Wells Fargo & Company", "sector": "Financial"},
-            {"symbol": "GS", "name": "Goldman Sachs Group Inc.", "sector": "Financial"},
-            {"symbol": "MS", "name": "Morgan Stanley", "sector": "Financial"},
-            {"symbol": "V", "name": "Visa Inc.", "sector": "Financial"},
-            {"symbol": "MA", "name": "Mastercard Inc.", "sector": "Financial"},
-            
-            # Healthcare stocks
-            {"symbol": "JNJ", "name": "Johnson & Johnson", "sector": "Healthcare"},
-            {"symbol": "PFE", "name": "Pfizer Inc.", "sector": "Healthcare"},
-            {"symbol": "UNH", "name": "UnitedHealth Group Inc.", "sector": "Healthcare"},
-            {"symbol": "ABBV", "name": "AbbVie Inc.", "sector": "Healthcare"},
-            {"symbol": "MRK", "name": "Merck & Co. Inc.", "sector": "Healthcare"},
-            
-            # Consumer stocks
-            {"symbol": "KO", "name": "Coca-Cola Company", "sector": "Consumer"},
-            {"symbol": "PEP", "name": "PepsiCo Inc.", "sector": "Consumer"},
-            {"symbol": "WMT", "name": "Walmart Inc.", "sector": "Consumer"},
-            {"symbol": "PG", "name": "Procter & Gamble Company", "sector": "Consumer"},
-            {"symbol": "HD", "name": "Home Depot Inc.", "sector": "Consumer"},
-            
-            # Energy stocks
-            {"symbol": "XOM", "name": "Exxon Mobil Corporation", "sector": "Energy"},
-            {"symbol": "CVX", "name": "Chevron Corporation", "sector": "Energy"},
-            
-            # Others
-            {"symbol": "BRK-B", "name": "Berkshire Hathaway Inc.", "sector": "Financial"},
-            {"symbol": "SPY", "name": "SPDR S&P 500 ETF Trust", "sector": "ETF"},
-            {"symbol": "QQQ", "name": "Invesco QQQ Trust", "sector": "ETF"},
-        ]
     
     def _load_cache(self) -> Dict:
         """Load stock information cache"""
@@ -93,42 +44,29 @@ class StockInfoManager:
     
     def search_stocks(self, query: str, limit: int = 10) -> List[Dict]:
         """
-        Search stocks
+        Search stocks by symbol
         Args:
-            query: Search keyword
-            limit: Maximum number of results
+            query: Stock symbol to search
+            limit: Maximum number of results (kept for compatibility)
         Returns:
-            List of matching stocks
+            List containing the stock if found, empty list otherwise
         """
         if not query or len(query.strip()) < 1:
             return []  # Return empty list when no search query
         
         query = query.upper().strip()
-        matches = []
         
-        # Search popular stocks list
-        for stock in self.popular_stocks:
-            symbol = stock["symbol"]
-            name = stock["name"].upper()
-            
-            # Exact match for stock symbol
-            if symbol.startswith(query):
-                matches.append(stock)
-            # Fuzzy match for company name
-            elif query in name:
-                matches.append(stock)
+        # Try to get stock information for the entered symbol
+        stock_info = self.get_stock_info(query)
+        if stock_info and stock_info.get("name") and stock_info["name"] != query:
+            # Only return if we got a valid name (not just the symbol itself)
+            return [{
+                "symbol": stock_info["symbol"],
+                "name": stock_info["name"],
+                "sector": stock_info["sector"]
+            }]
         
-        # Remove duplicates and limit results
-        seen_symbols = set()
-        unique_matches = []
-        for stock in matches:
-            if stock["symbol"] not in seen_symbols:
-                unique_matches.append(stock)
-                seen_symbols.add(stock["symbol"])
-                if len(unique_matches) >= limit:
-                    break
-        
-        return unique_matches
+        return []
     
     def get_stock_info(self, symbol: str) -> Optional[Dict]:
         """
