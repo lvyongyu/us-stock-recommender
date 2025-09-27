@@ -98,3 +98,11 @@ docs/RAILWAY_DEPLOY.md
 docs/RENDER_DEPLOY.md
 docs/SAFARI_COMPATIBILITY.md
 docs/STREAMLIT_CLOUD_DEPLOY.md
+
+# Test scripts (不提交到版本控制)
+test_*.py
+*_test.py
+test_*.txt
+*_test.txt
+test_*.md
+*_test.md
