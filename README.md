@@ -19,6 +19,7 @@ A powerful multi-language US stock analysis and recommendation system with modul
 - 🎯 **Smart Recommendation Engine**: Automatically generates investment recommendations based on multiple indicators
 - 📊 **Risk Assessment System**: Automatic investment risk level and confidence assessment
 - 📋 **Detailed Reports**: Generate comprehensive bilingual analysis reports
+- 🎮 **Simulation Trading**: Practice investing with virtual money, test strategies through historical backtesting
 - 🧪 **Comprehensive Testing**: Full coverage with unit tests, integration tests, and performance tests
 
 ## Installation
@@ -166,6 +167,75 @@ TSLA,Tesla Inc,Consumer Discretionary
    Failed: 0
    Analysis Time: 12.3s
 ```
+
+## 🎮 Web Interface & Simulation Trading
+
+The system provides a modern web interface built with Streamlit, featuring portfolio management and simulation trading capabilities.
+
+### Launch Web Interface
+
+```bash
+# Start the web application
+streamlit run portfolio_app.py
+
+# Access at: http://localhost:8501
+```
+
+### Web Interface Features
+
+- **🏠 Dashboard**: Overview of portfolio performance and market insights
+- **💼 Portfolio Management**: Create and manage investment portfolios
+- **🔍 Portfolio Analysis**: Detailed analysis of portfolio holdings
+- **🆚 Portfolio Comparison**: Compare multiple portfolios side-by-side
+- **🎮 Simulation Trading**: Practice investing with virtual money
+- **⚙️ Settings**: Configure application preferences
+
+### Simulation Trading Features
+
+Practice investing without financial risk using virtual accounts:
+
+#### Account Management
+- Create simulation accounts with virtual funds ($100,000 default)
+- Track account balance, positions, and performance
+- View detailed transaction history
+
+#### Virtual Trading
+- Buy and sell stocks with real-time pricing
+- Transaction fee simulation (0.1%)
+- Position tracking with P&L calculations
+- Risk-free practice environment
+
+#### Historical Backtesting
+- Test investment strategies on historical data
+- Multiple strategies: Buy-and-Hold, Mean Reversion
+- Performance metrics: Sharpe ratio, max drawdown, win rate
+- Interactive charts and detailed reports
+
+#### Getting Started with Simulation
+
+1. **Launch Web Interface**:
+   ```bash
+   streamlit run portfolio_app.py
+   ```
+
+2. **Navigate to Simulation Trading**:
+   - Select "🎮 Simulation Trading" from the sidebar
+   - Choose "账户管理" (Account Management)
+
+3. **Create Your First Account**:
+   - Click "创建模拟账户" (Create Simulation Account)
+   - Set account name and initial balance
+   - Start practicing with virtual trades
+
+4. **Try Virtual Trading**:
+   - Switch to "虚拟交易" (Virtual Trading)
+   - Select your account and start buying/selling stocks
+   - Monitor your positions and performance
+
+5. **Run Backtests**:
+   - Go to "历史回测" (Historical Backtesting)
+   - Select stocks and strategy
+   - Analyze historical performance
 
 ## Analysis Indicators
 

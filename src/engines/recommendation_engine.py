@@ -156,3 +156,22 @@ class RecommendationEngine:
             return self.lang_config.get("medium")
         else:
             return self.lang_config.get("low")
+    
+    def generate_recommendation_for_symbol(self, analyzer, symbol: str, strategy_type: str = 'combined') -> Dict:
+        """Generate recommendation for a specific symbol"""
+        try:
+            # Temporarily set the analyzer's symbol
+            original_symbol = getattr(analyzer, 'symbol', None)
+            analyzer.symbol = symbol
+
+            # Generate recommendation
+            recommendation = self.generate_recommendation(strategy_type)
+
+            # Restore original symbol if it existed
+            if original_symbol is not None:
+                analyzer.symbol = original_symbol
+
+            return recommendation
+
+        except Exception as e:
+            raise Exception(f"Recommendation generation failed for {symbol}: {str(e)}")
