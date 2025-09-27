@@ -1,5 +1,4 @@
 """
-动态股票搜索和选择组件
 Dynamic Stock Search and Selection Component
 """
 
@@ -10,39 +9,39 @@ from .stock_info_manager import StockInfoManager, get_stock_manager
 
 def create_dynamic_stock_selector(
     key: str = "stock_selector",
-    placeholder: str = "搜索股票代码或公司名称...",
-    help_text: str = "输入股票代码（如 AAPL）或公司名称进行搜索"
+    placeholder: str = "Search stock symbol or company name...",
+    help_text: str = "Enter stock symbol (e.g. AAPL) or company name to search"
 ) -> Tuple[Optional[str], Optional[Dict]]:
     """
-    创建动态股票选择器
+    Create dynamic stock selector
     
     Args:
-        key: 组件唯一标识
-        placeholder: 输入框占位符
-        help_text: 帮助文本
+        key: Component unique identifier
+        placeholder: Input field placeholder
+        help_text: Help text
     
     Returns:
-        (selected_symbol, stock_info): 选中的股票代码和详细信息
+        (selected_symbol, stock_info): Selected stock symbol and detailed information
     """
     
-    # 获取股票管理器
+    # Get stock manager
     stock_manager = get_stock_manager()
     
-    # 创建搜索输入框
+    # Create search input
     col1, col2 = st.columns([3, 1])
     
     with col1:
         search_query = st.text_input(
-            "股票搜索",
+            "Stock Search",
             placeholder=placeholder,
             help=help_text,
             key=f"{key}_search"
         )
     
     with col2:
-        search_button = st.button("🔍 搜索", key=f"{key}_button")
+        search_button = st.button("🔍 Search", key=f"{key}_button")
     
-    # 初始化session state
+    # Initialize session state
     if f"{key}_results" not in st.session_state:
         st.session_state[f"{key}_results"] = []
     if f"{key}_selected" not in st.session_state:
@@ -50,24 +49,24 @@ def create_dynamic_stock_selector(
     if f"{key}_stock_info" not in st.session_state:
         st.session_state[f"{key}_stock_info"] = {}
     
-    # 实时搜索（当输入发生变化时）
+    # Real-time search (when input changes)
     if search_query and len(search_query.strip()) > 0:
-        # 执行搜索
+        # Execute search
         search_results = stock_manager.search_stocks(search_query, limit=15)
         st.session_state[f"{key}_results"] = search_results
     elif not search_query:
-        # 显示热门股票
+        # Show popular stocks
         st.session_state[f"{key}_results"] = stock_manager.search_stocks("", limit=10)
     
-    # 显示搜索结果
+    # Display search results
     if st.session_state[f"{key}_results"]:
-        st.markdown("### 📈 搜索结果")
+        st.markdown("### 📈 Search Results")
         
-        # 创建结果显示区域
+        # Create results display area
         results_container = st.container()
         
         with results_container:
-            # 使用columns来创建网格布局
+            # Use columns to create grid layout
             cols_per_row = 2
             results = st.session_state[f"{key}_results"]
             
@@ -79,10 +78,10 @@ def create_dynamic_stock_selector(
                         stock = results[i + j]
                         
                         with col:
-                            # 创建股票卡片
+                            # Create stock card
                             _create_stock_card(stock, key, stock_manager)
     
-    # 显示选中的股票详细信息
+    # Display selected stock detailed information
     if st.session_state[f"{key}_selected"]:
         selected_symbol = st.session_state[f"{key}_selected"]
         stock_info = st.session_state[f"{key}_stock_info"].get(selected_symbol)
@@ -94,14 +93,14 @@ def create_dynamic_stock_selector(
     return None, None
 
 def _create_stock_card(stock: Dict, key: str, stock_manager: StockInfoManager):
-    """创建股票卡片"""
+    """Create stock card"""
     symbol = stock["symbol"]
     name = stock["name"]
     sector = stock.get("sector", "Unknown")
     
-    # 创建卡片容器
+    # Create card container
     with st.container():
-        # 股票基本信息
+        # Stock basic information
         st.markdown(f"""
         <div style="
             border: 1px solid #ddd; 
@@ -117,10 +116,10 @@ def _create_stock_card(stock: Dict, key: str, stock_manager: StockInfoManager):
         </div>
         """, unsafe_allow_html=True)
         
-        # 选择按钮
-        if st.button(f"选择 {symbol}", key=f"{key}_select_{symbol}", help=f"选择 {name}"):
-            # 获取股票详细信息
-            with st.spinner(f"正在获取 {symbol} 的详细信息..."):
+        # Select button
+        if st.button(f"Select {symbol}", key=f"{key}_select_{symbol}", help=f"Select {name}"):
+            # Get stock detailed information
+            with st.spinner(f"Getting detailed information for {symbol}..."):
                 stock_info = stock_manager.get_stock_info(symbol)
                 
                 if stock_info:
@@ -128,72 +127,72 @@ def _create_stock_card(stock: Dict, key: str, stock_manager: StockInfoManager):
                     st.session_state[f"{key}_stock_info"][symbol] = stock_info
                     st.rerun()
                 else:
-                    st.error(f"无法获取 {symbol} 的详细信息")
+                    st.error(f"Unable to get detailed information for {symbol}")
 
 def _display_selected_stock_info(stock_info: Dict):
-    """显示选中股票的详细信息"""
-    st.markdown("### 📊 选中股票详情")
+    """Display selected stock detailed information"""
+    st.markdown("### 📊 Selected Stock Details")
     
     col1, col2, col3 = st.columns(3)
     
     with col1:
         st.metric(
-            label="股票代码",
+            label="Stock Symbol",
             value=stock_info["symbol"]
         )
     
     with col2:
         if stock_info.get("current_price"):
             st.metric(
-                label="当前价格",
+                label="Current Price",
                 value=f"${stock_info['current_price']:.2f}",
                 delta=None
             )
     
     with col3:
         st.metric(
-            label="行业",
+            label="Sector",
             value=stock_info.get("sector", "Unknown")
         )
     
-    # 公司名称和描述
-    st.markdown(f"**公司名称**: {stock_info['name']}")
+    # Company name and description
+    st.markdown(f"**Company Name**: {stock_info['name']}")
     
     if stock_info.get("description"):
-        with st.expander("📝 公司简介"):
+        with st.expander("📝 Company Profile"):
             st.write(stock_info["description"])
     
-    # 其他财务指标
+    # Other financial metrics
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
         if stock_info.get("market_cap"):
             market_cap_b = stock_info["market_cap"] / 1e9
-            st.metric("市值", f"${market_cap_b:.1f}B")
+            st.metric("Market Cap", f"${market_cap_b:.1f}B")
     
     with col2:
         if stock_info.get("pe_ratio"):
-            st.metric("P/E 比率", f"{stock_info['pe_ratio']:.2f}")
+            st.metric("P/E Ratio", f"{stock_info['pe_ratio']:.2f}")
     
     with col3:
         if stock_info.get("dividend_yield"):
             dividend_pct = stock_info["dividend_yield"] * 100
-            st.metric("股息收益率", f"{dividend_pct:.2f}%")
+            st.metric("Dividend Yield", f"{dividend_pct:.2f}%")
     
     with col4:
         if stock_info.get("beta"):
-            st.metric("贝塔系数", f"{stock_info['beta']:.2f}")
+            st.metric("Beta", f"{stock_info['beta']:.2f}")
 
 def create_stock_weight_input(selected_symbol: str, key: str = "weight_input") -> Optional[float]:
     """
-    创建股票权重输入组件
+    Create stock weight input component
     
     Args:
-        selected_symbol: 选中的股票代码
-        key: 组件唯一标识
+        selected_symbol: Selected stock symbol
+        key: Component unique identifier
     
     Returns:
-        输入的权重值
+        Input weight value
     """
     if not selected_symbol:
         return None
@@ -202,18 +201,18 @@ def create_stock_weight_input(selected_symbol: str, key: str = "weight_input") -
     
     with col1:
         weight = st.number_input(
-            f"设置 {selected_symbol} 的权重",
+            f"Set weight for {selected_symbol}",
             min_value=0.01,
             max_value=1.00,
             value=0.10,
             step=0.01,
             format="%.2f",
-            help="权重范围: 0.01 - 1.00 (1% - 100%)",
+            help="Weight range: 0.01 - 1.00 (1% - 100%)",
             key=f"{key}_weight"
         )
     
     with col2:
         weight_pct = weight * 100
-        st.metric("权重百分比", f"{weight_pct:.1f}%")
+        st.metric("Weight Percentage", f"{weight_pct:.1f}%")
     
     return weight

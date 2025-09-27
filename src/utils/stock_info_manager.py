@@ -1,5 +1,4 @@
 """
-股票信息数据库和动态搜索功能
 Stock Information Database and Dynamic Search Functions
 """
 
@@ -12,7 +11,7 @@ import os
 from datetime import datetime
 
 class StockInfoManager:
-    """股票信息管理器"""
+    """Stock information manager"""
     
     def __init__(self):
         self.stock_cache_file = os.path.expanduser("~/.stock_recommender/stock_info_cache.json")
@@ -21,15 +20,15 @@ class StockInfoManager:
         self.stock_info_cache = self._load_cache()
     
     def ensure_cache_dir(self):
-        """确保缓存目录存在"""
+        """Ensure cache directory exists"""
         cache_dir = os.path.dirname(self.stock_cache_file)
         if not os.path.exists(cache_dir):
             os.makedirs(cache_dir, exist_ok=True)
     
     def _get_popular_stocks(self) -> List[Dict]:
-        """获取常用股票列表"""
+        """Get popular stocks list"""
         return [
-            # 科技股
+            # Technology stocks
             {"symbol": "AAPL", "name": "Apple Inc.", "sector": "Technology"},
             {"symbol": "MSFT", "name": "Microsoft Corporation", "sector": "Technology"},
             {"symbol": "GOOGL", "name": "Alphabet Inc.", "sector": "Technology"},
@@ -41,7 +40,7 @@ class StockInfoManager:
             {"symbol": "ADBE", "name": "Adobe Inc.", "sector": "Technology"},
             {"symbol": "CRM", "name": "Salesforce Inc.", "sector": "Technology"},
             
-            # 金融股
+            # Financial stocks
             {"symbol": "JPM", "name": "JPMorgan Chase & Co.", "sector": "Financial"},
             {"symbol": "BAC", "name": "Bank of America Corp.", "sector": "Financial"},
             {"symbol": "WFC", "name": "Wells Fargo & Company", "sector": "Financial"},
@@ -50,32 +49,32 @@ class StockInfoManager:
             {"symbol": "V", "name": "Visa Inc.", "sector": "Financial"},
             {"symbol": "MA", "name": "Mastercard Inc.", "sector": "Financial"},
             
-            # 医疗保健
+            # Healthcare stocks
             {"symbol": "JNJ", "name": "Johnson & Johnson", "sector": "Healthcare"},
             {"symbol": "PFE", "name": "Pfizer Inc.", "sector": "Healthcare"},
             {"symbol": "UNH", "name": "UnitedHealth Group Inc.", "sector": "Healthcare"},
             {"symbol": "ABBV", "name": "AbbVie Inc.", "sector": "Healthcare"},
             {"symbol": "MRK", "name": "Merck & Co. Inc.", "sector": "Healthcare"},
             
-            # 消费品
+            # Consumer stocks
             {"symbol": "KO", "name": "Coca-Cola Company", "sector": "Consumer"},
             {"symbol": "PEP", "name": "PepsiCo Inc.", "sector": "Consumer"},
             {"symbol": "WMT", "name": "Walmart Inc.", "sector": "Consumer"},
             {"symbol": "PG", "name": "Procter & Gamble Company", "sector": "Consumer"},
             {"symbol": "HD", "name": "Home Depot Inc.", "sector": "Consumer"},
             
-            # 能源股
+            # Energy stocks
             {"symbol": "XOM", "name": "Exxon Mobil Corporation", "sector": "Energy"},
             {"symbol": "CVX", "name": "Chevron Corporation", "sector": "Energy"},
             
-            # 其他
+            # Others
             {"symbol": "BRK-B", "name": "Berkshire Hathaway Inc.", "sector": "Financial"},
             {"symbol": "SPY", "name": "SPDR S&P 500 ETF Trust", "sector": "ETF"},
             {"symbol": "QQQ", "name": "Invesco QQQ Trust", "sector": "ETF"},
         ]
     
     def _load_cache(self) -> Dict:
-        """加载股票信息缓存"""
+        """Load stock information cache"""
         try:
             if os.path.exists(self.stock_cache_file):
                 with open(self.stock_cache_file, 'r', encoding='utf-8') as f:
@@ -85,7 +84,7 @@ class StockInfoManager:
         return {}
     
     def _save_cache(self):
-        """保存股票信息缓存"""
+        """Save stock information cache"""
         try:
             with open(self.stock_cache_file, 'w', encoding='utf-8') as f:
                 json.dump(self.stock_info_cache, f, ensure_ascii=False, indent=2)
@@ -94,12 +93,12 @@ class StockInfoManager:
     
     def search_stocks(self, query: str, limit: int = 10) -> List[Dict]:
         """
-        搜索股票
+        Search stocks
         Args:
-            query: 搜索关键词
-            limit: 返回结果数量限制
+            query: Search keyword
+            limit: Maximum number of results
         Returns:
-            匹配的股票列表
+            List of matching stocks
         """
         if not query or len(query.strip()) < 1:
             return self.popular_stocks[:limit]
@@ -107,19 +106,19 @@ class StockInfoManager:
         query = query.upper().strip()
         matches = []
         
-        # 搜索流行股票列表
+        # Search popular stocks list
         for stock in self.popular_stocks:
             symbol = stock["symbol"]
             name = stock["name"].upper()
             
-            # 精确匹配股票代码
+            # Exact match for stock symbol
             if symbol.startswith(query):
                 matches.append(stock)
-            # 模糊匹配公司名称
+            # Fuzzy match for company name
             elif query in name:
                 matches.append(stock)
         
-        # 去重并限制数量
+        # Remove duplicates and limit results
         seen_symbols = set()
         unique_matches = []
         for stock in matches:
@@ -133,25 +132,25 @@ class StockInfoManager:
     
     def get_stock_info(self, symbol: str) -> Optional[Dict]:
         """
-        获取股票详细信息
+        Get detailed stock information
         Args:
-            symbol: 股票代码
+            symbol: Stock symbol
         Returns:
-            股票信息字典
+            Stock information dictionary
         """
         symbol = symbol.upper().strip()
         
-        # 检查缓存
+        # Check cache
         cache_key = f"{symbol}_{datetime.now().strftime('%Y-%m-%d')}"
         if cache_key in self.stock_info_cache:
             return self.stock_info_cache[cache_key]
         
         try:
-            # 从 yfinance 获取数据
+            # Get data from yfinance
             ticker = yf.Ticker(symbol)
             info = ticker.info
             
-            # 获取历史数据用于计算当前价格
+            # Get historical data for current price calculation
             hist = ticker.history(period="1d")
             current_price = hist['Close'].iloc[-1] if not hist.empty else None
             
@@ -170,7 +169,7 @@ class StockInfoManager:
                 "description": info.get("longBusinessSummary", "")[:200] + "..." if info.get("longBusinessSummary") else ""
             }
             
-            # 缓存结果
+            # Cache the result
             self.stock_info_cache[cache_key] = stock_info
             self._save_cache()
             
@@ -181,19 +180,19 @@ class StockInfoManager:
             return None
     
     def format_stock_display(self, stock_info: Dict) -> str:
-        """格式化股票显示信息"""
+        """Format stock display information"""
         symbol = stock_info["symbol"]
         name = stock_info["name"]
         sector = stock_info.get("sector", "Unknown")
         
-        # 如果有实时价格信息
+        # If real-time price information is available
         if "current_price" in stock_info and stock_info["current_price"]:
             price = stock_info["current_price"]
             return f"{symbol} - {name} ({sector}) - ${price:.2f}"
         else:
             return f"{symbol} - {name} ({sector})"
 
-@st.cache_data(ttl=3600)  # 缓存1小时
+@st.cache_data(ttl=3600)  # Cache for 1 hour
 def get_stock_manager():
-    """获取股票信息管理器实例"""
+    """Get stock information manager instance"""
     return StockInfoManager()

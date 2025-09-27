@@ -29,10 +29,10 @@ SYMBOL_CORRECTIONS = {
     'SHOPIFY': 'SHOP'
 }
 
-# 已知退市/被收购股票信息
+# Known delisted/acquired stocks information
 # Known delisted/acquired stocks information
 DELISTED_STOCKS = {
-    # 2023年银行业危机
+    # 2023 banking crisis
     'SIVB': {
         'en': 'Silicon Valley Bank collapsed (2023)',
         'zh': 'Silicon Valley Bank已倒闭 (2023)'

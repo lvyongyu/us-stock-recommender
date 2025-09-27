@@ -107,11 +107,11 @@ def init_session_state():
     if 'analysis_cache' not in st.session_state:
         st.session_state.analysis_cache = {}
     
-    # 初始化股票信息缓存，为将来的K线等功能做准备
+    # Initialize stock information cache for future K-line and other features
     if 'portfolio_stock_cache' not in st.session_state:
         st.session_state.portfolio_stock_cache = {}
     
-    # 初始化股票管理器缓存
+    # Initialize stock manager cache
     if 'stock_manager' not in st.session_state:
         st.session_state.stock_manager = get_stock_manager()
 
@@ -473,68 +473,68 @@ def show_portfolio_management():
                 # 使用动态股票选择器
                 selected_symbol, stock_info = create_dynamic_stock_selector(
                     key=f"add_stock_{selected_portfolio_name}",
-                    placeholder="搜索股票代码或公司名称... (例如: AAPL, Apple)",
-                    help_text="输入股票代码或公司名称进行实时搜索"
+                    placeholder="Search stock symbol or company name... (e.g. AAPL, Apple)",
+                    help_text="Enter stock symbol or company name for real-time search"
                 )
                 
-                # 如果选中了股票，显示权重设置和添加按钮
+                # If stock is selected, show weight settings and add button
                 if selected_symbol and stock_info:
                     st.markdown("---")
                     
                     with st.form(f"add_stock_form_{selected_symbol}"):
-                        st.markdown(f"### 🎯 添加 **{selected_symbol}** 到投资组合")
+                        st.markdown(f"### 🎯 Add **{selected_symbol}** to Portfolio")
                         
                         col1, col2 = st.columns(2)
                         
                         with col1:
                             weight = st.number_input(
-                                "权重 (%)", 
+                                "Weight (%)", 
                                 min_value=0.1, 
                                 max_value=100.0, 
                                 value=10.0, 
                                 step=0.1,
-                                help="该股票在投资组合中的权重百分比"
+                                help="Weight percentage of this stock in the portfolio"
                             )
                         
                         with col2:
                             target_weight = st.number_input(
-                                "目标权重 (%)", 
+                                "Target Weight (%)", 
                                 min_value=0.1, 
                                 max_value=100.0, 
                                 value=weight, 
                                 step=0.1,
-                                help="理想的目标权重（可选）"
+                                help="Ideal target weight (optional)"
                             )
                         
                         notes = st.text_area(
-                            "投资备注 (可选)", 
-                            placeholder="记录投资理由或相关分析...",
-                            help="可以记录选择这只股票的原因"
+                            "Investment Notes (optional)", 
+                            placeholder="Record investment rationale or analysis...",
+                            help="You can record reasons for selecting this stock"
                         )
                         
-                        # 显示当前股票价格信息
+                        # Display current stock price information
                         if stock_info.get("current_price"):
-                            st.info(f"💰 当前价格: ${stock_info['current_price']:.2f} | "
-                                   f"📊 权重: {weight}% | "
-                                   f"🏢 行业: {stock_info.get('sector', 'Unknown')}")
+                            st.info(f"💰 Current Price: ${stock_info['current_price']:.2f} | "
+                                   f"📊 Weight: {weight}% | "
+                                   f"🏢 Sector: {stock_info.get('sector', 'Unknown')}")
                         
                         col1, col2, col3 = st.columns([1, 1, 1])
                         
                         with col2:
                             add_stock_submit = st.form_submit_button(
-                                f"✅ 添加 {selected_symbol}", 
-                                help=f"将 {selected_symbol} 添加到投资组合中",
+                                f"✅ Add {selected_symbol}", 
+                                help=f"Add {selected_symbol} to portfolio",
                                 use_container_width=True
                             )
                         
                         if add_stock_submit:
                             try:
-                                # 保存股票信息到缓存（为将来的K线等功能做准备）
+                                # Save stock information to cache (prepare for future K-line and other features)
                                 if 'portfolio_stock_cache' not in st.session_state:
                                     st.session_state.portfolio_stock_cache = {}
                                 st.session_state.portfolio_stock_cache[selected_symbol] = stock_info
                                 
-                                # 添加股票到投资组合
+                                # Add stock to portfolio
                                 manager.add_stock(
                                     selected_portfolio_name,
                                     selected_symbol,
@@ -543,19 +543,19 @@ def show_portfolio_management():
                                     notes=notes if notes else None
                                 )
                                 
-                                st.success(f"🎉 成功添加 {selected_symbol} ({stock_info['name']}) 到投资组合!")
-                                st.balloons()  # 添加一些庆祝效果
+                                st.success(f"🎉 Successfully added {selected_symbol} ({stock_info['name']}) to portfolio!")
+                                st.balloons()  # Add some celebration effects
                                 
-                                # 清理选择状态，准备添加下一个股票
+                                # Clean selection state, prepare to add next stock
                                 if f"add_stock_{selected_portfolio_name}_selected" in st.session_state:
                                     del st.session_state[f"add_stock_{selected_portfolio_name}_selected"]
                                 
                                 st.rerun()
                                 
                             except Exception as e:
-                                st.error(f"❌ 添加股票时出错: {e}")
+                                st.error(f"❌ Error adding stock: {e}")
                 else:
-                    st.info("👆 请先搜索并选择要添加的股票")
+                    st.info("👆 Please search and select a stock to add first")
                 
                 # Current holdings
                 if portfolio.holdings:
@@ -587,7 +587,7 @@ def show_portfolio_management():
                     st.dataframe(df_holdings, use_container_width=True)
                     
                     # 股票详细信息展示
-                    st.write("**📊 持仓股票详细信息**")
+                    st.write("**📊 Detailed Portfolio Information**")
                     
                     # 创建可展开的股票信息卡片
                     for holding in portfolio.holdings:
