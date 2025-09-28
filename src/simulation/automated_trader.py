@@ -46,6 +46,7 @@ class AutomatedTrader:
 
         print(f"🤖 Starting automated trading for account {account_id}")
         print(f"💰 Available cash: ${available_cash:,.2f}")
+        print(f"👤 Account balance: ${account.available_balance:,.2f}")
 
         # Get current positions
         current_positions = self.account_manager.calculate_positions(account_id)
@@ -156,6 +157,11 @@ class AutomatedTrader:
         # Update account summary
         account_summary = self.account_manager.get_account_summary(account_id)
 
+        # Provide feedback on why no trades were executed
+        if len(buy_recommendations) == 0 and len(sell_recommendations) == 0:
+            print(f"⚠️ No BUY or SELL recommendations found. All {len(hold_recommendations)} recommendations were HOLD.")
+            print("💡 Consider using different stocks or analysis methods to generate trading signals.")
+
         result = {
             "success": True,
             "account_id": account_id,
@@ -166,7 +172,12 @@ class AutomatedTrader:
             "failed_trades_count": len(failed_trades),
             "total_invested": total_invested,
             "account_summary": account_summary,
-            "execution_time": datetime.now().isoformat()
+            "execution_time": datetime.now().isoformat(),
+            "recommendation_summary": {
+                "buy_recommendations": len(buy_recommendations),
+                "sell_recommendations": len(sell_recommendations),
+                "hold_recommendations": len(hold_recommendations)
+            }
         }
 
         print(f"🎯 Execution completed: {len(executed_trades)} successful, {len(failed_trades)} failed")

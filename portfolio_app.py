@@ -135,7 +135,8 @@ def get_strategy_color(strategy_type: StrategyType) -> str:
     colors = {
         StrategyType.CONSERVATIVE: "#28a745",
         StrategyType.BALANCED: "#ffc107", 
-        StrategyType.AGGRESSIVE: "#dc3545"
+        StrategyType.AGGRESSIVE: "#dc3545",
+        StrategyType.CUSTOM: "#6c757d"
     }
     return colors.get(strategy_type, "#6c757d")
 
@@ -400,7 +401,7 @@ def show_portfolio_management():
                 portfolio_name = st.text_input("Portfolio Name", placeholder="e.g., Tech Growth Portfolio")
                 strategy = st.selectbox(
                     "Investment Strategy",
-                    options=[StrategyType.CONSERVATIVE, StrategyType.BALANCED, StrategyType.AGGRESSIVE],
+                    options=[StrategyType.CONSERVATIVE, StrategyType.BALANCED, StrategyType.AGGRESSIVE, StrategyType.CUSTOM],
                     format_func=lambda x: x.value.title()
                 )
             
@@ -462,8 +463,8 @@ def show_portfolio_management():
                     with col2:
                         new_strategy = st.selectbox(
                             "Strategy",
-                            options=[StrategyType.CONSERVATIVE, StrategyType.BALANCED, StrategyType.AGGRESSIVE],
-                            index=[StrategyType.CONSERVATIVE, StrategyType.BALANCED, StrategyType.AGGRESSIVE].index(portfolio.strategy_type),
+                            options=[StrategyType.CONSERVATIVE, StrategyType.BALANCED, StrategyType.AGGRESSIVE, StrategyType.CUSTOM],
+                            index=[StrategyType.CONSERVATIVE, StrategyType.BALANCED, StrategyType.AGGRESSIVE, StrategyType.CUSTOM].index(portfolio.strategy_type),
                             format_func=lambda x: x.value.title()
                         )
                     
@@ -884,108 +885,26 @@ def show_portfolio_analysis():
         with col4:
             st.metric("Largest Position", f"{metrics['largest_position']:.1%}")
         
-        # Individual stock analysis
-        st.subheader("📈 Individual Stock Analysis")
+        # Portfolio holdings overview
+        st.subheader("📋 Portfolio Holdings")
         
         individual = analysis['individual_analysis']
         
-        # Create expandable detailed view
+        # Create a simple holdings table
+        holdings_data = []
         for symbol, stock_analysis in individual.items():
-            with st.expander(f"📊 {symbol} - Detailed Analysis", expanded=False):
-                col1, col2, col3 = st.columns(3)
-                
-                with col1:
-                    st.metric("Current Price", f"${stock_analysis.get('current_price', 'N/A'):.2f}" if stock_analysis.get('current_price') else "N/A")
-                    st.metric("Weight", f"{stock_analysis['weight']:.1%}")
-                    st.metric("Recommendation", stock_analysis['recommendation'])
-                
-                with col2:
-                    price_change = stock_analysis.get('price_change')
-                    price_change_pct = stock_analysis.get('price_change_pct')
-                    if price_change is not None:
-                        st.metric("Price Change", f"${price_change:+.2f}", delta=f"{price_change_pct:+.2f}%" if price_change_pct else None)
-                    else:
-                        st.metric("Price Change", "N/A")
-                    
-                    st.metric("Confidence", f"{stock_analysis['confidence']:.1%}")
-                    st.metric("Risk Score", f"{stock_analysis['risk_score']:.2f}")
-                
-                with col3:
-                    st.metric("Expected Return", f"{stock_analysis['expected_return']:.1%}")
-                    st.metric("Risk Level", stock_analysis.get('risk_level', 'Unknown'))
-                    st.metric("Strategy Used", stock_analysis.get('strategy_used', 'Unknown'))
-                
-                # Technical Indicators
-                st.subheader("📈 Technical Indicators")
-                key_metrics = stock_analysis.get('key_metrics', {})
-                
-                tech_col1, tech_col2, tech_col3, tech_col4 = st.columns(4)
-                
-                with tech_col1:
-                    rsi = key_metrics.get('RSI')
-                    st.metric("RSI", f"{rsi:.2f}" if rsi else "N/A")
-                
-                with tech_col2:
-                    macd = key_metrics.get('MACD')
-                    st.metric("MACD", f"{macd:.4f}" if macd else "N/A")
-                
-                with tech_col3:
-                    sma20 = key_metrics.get('SMA20')
-                    st.metric("SMA 20", f"${sma20:.2f}" if sma20 else "N/A")
-                
-                with tech_col4:
-                    sma50 = key_metrics.get('SMA50')
-                    st.metric("SMA 50", f"${sma50:.2f}" if sma50 else "N/A")
-                
-                # Trend, Momentum, Volume Analysis
-                st.subheader("📊 Market Analysis")
-                analysis_col1, analysis_col2, analysis_col3 = st.columns(3)
-                
-                with analysis_col1:
-                    trend = stock_analysis.get('trend', 'Unknown')
-                    st.metric("Trend", trend)
-                
-                with analysis_col2:
-                    momentum = stock_analysis.get('momentum', 'Unknown')
-                    st.metric("Momentum", momentum)
-                
-                with analysis_col3:
-                    volume = stock_analysis.get('volume', 'Unknown')
-                    st.metric("Volume", volume)
-                
-                # Individual strategy results if available
-                individual_strategies = stock_analysis.get('individual_strategies')
-                if individual_strategies:
-                    st.subheader("🎯 Strategy Breakdown")
-                    strategy_data = []
-                    for strategy_name, strategy_result in individual_strategies.items():
-                        strategy_data.append({
-                            'Strategy': strategy_name.title(),
-                            'Action': strategy_result.get('action', 'Unknown'),
-                            'Confidence': f"{strategy_result.get('confidence', 0):.1%}",
-                            'Score': f"{strategy_result.get('score', 0):.2f}"
-                        })
-                    
-                    if strategy_data:
-                        st.dataframe(pd.DataFrame(strategy_data), use_container_width=True)
-        
-        # Summary table for quick overview
-        st.subheader("📋 Quick Overview")
-        stock_data = []
-        for symbol, stock_analysis in individual.items():
-            stock_data.append({
+            holdings_data.append({
                 'Symbol': symbol,
                 'Weight': f"{stock_analysis['weight']:.1%}",
                 'Recommendation': stock_analysis['recommendation'],
                 'Confidence': f"{stock_analysis['confidence']:.1%}",
                 'Risk Score': f"{stock_analysis['risk_score']:.2f}",
-                'Expected Return': f"{stock_analysis['expected_return']:.1%}",
                 'Current Price': f"${stock_analysis.get('current_price', 0):.2f}" if stock_analysis.get('current_price') else "N/A"
             })
         
-        if stock_data:
-            df_stocks = pd.DataFrame(stock_data)
-            st.dataframe(df_stocks, use_container_width=True)
+        if holdings_data:
+            df_holdings = pd.DataFrame(holdings_data)
+            st.dataframe(df_holdings, use_container_width=True)
         
         # Risk assessment
         st.subheader("⚠️ Risk Assessment")
@@ -1071,6 +990,305 @@ def show_portfolio_analysis():
         # Analysis cache info
         if analysis.get('is_cached'):
             st.info("ℹ️ This analysis used cached data. Check 'Force Refresh' for updated analysis.")
+        
+        # Automated Trading section (moved to bottom of page)
+        st.markdown("---")
+        st.header("🚀 Automated Trading")
+        
+        # Automated Trading option
+        enable_auto_trading = st.checkbox(
+            "Enable Automated Trading",
+            help="Automatically generate and execute trading recommendations for this portfolio"
+        )
+        
+        # Trading configuration (only show if automated trading is enabled)
+        if enable_auto_trading:
+            st.markdown("### ⚙️ Trading Configuration")
+            
+            # Check if simulation components are available
+            if not SIMULATION_AVAILABLE:
+                st.error("❌ Simulation trading components are not available")
+                enable_auto_trading = False
+            else:
+                # Select account
+                user_id = "demo_user"
+                accounts = st.session_state.simulation_manager.get_user_accounts(user_id)
+                
+                if not accounts:
+                    st.warning("No simulation accounts available. Create an account in Simulation > Account Management first.")
+                    enable_auto_trading = False
+                else:
+                    account_id = st.selectbox(
+                        "Select Trading Account",
+                        [acc.account_id for acc in accounts],
+                        format_func=lambda x: next(acc.account_name for acc in accounts if acc.account_id == x),
+                        key="analysis_auto_trade_account"
+                    )
+                    
+                    account = next(acc for acc in accounts if acc.account_id == account_id)
+                    
+                    # Display account status
+                    col1, col2, col3 = st.columns(3)
+                    with col1:
+                        st.metric("Available Funds", f"${account.available_balance:,.0f}")
+                    with col2:
+                        st.metric("Total Assets", f"${account.total_value:,.0f}")
+                    with col3:
+                        st.metric("Return Rate", f"{account.total_return:+.1f}%")
+                    
+                    # Trading configuration
+                    trade_col1, trade_col2, trade_col3 = st.columns(3)
+                    
+                    with trade_col1:
+                        investment_amount = st.number_input(
+                            "Investment Amount ($)",
+                            min_value=100.0,
+                            max_value=float(account.available_balance),
+                            value=min(10000.0, float(account.available_balance)),
+                            step=100.0,
+                            key="analysis_auto_trade_amount"
+                        )
+                    
+                    with trade_col2:
+                        risk_level = st.selectbox(
+                            "Risk Level",
+                            ["conservative", "moderate", "aggressive"],
+                            format_func=lambda x: {
+                                "conservative": "Conservative (Low Risk)",
+                                "moderate": "Moderate (Balanced)",
+                                "aggressive": "Aggressive (High Risk)"
+                            }.get(x, x),
+                            key="analysis_auto_trade_risk"
+                        )
+                    
+                    with trade_col3:
+                        analysis_method = st.selectbox(
+                            "Analysis Method",
+                            ["comprehensive", "technical", "fundamental"],
+                            format_func=lambda x: {
+                                "comprehensive": "Comprehensive",
+                                "technical": "Technical Only",
+                                "fundamental": "Fundamental Only"
+                            }.get(x, x),
+                            key="analysis_auto_trade_analysis"
+                        )
+            
+            # Automated Trading execution (only show if enabled)
+            if enable_auto_trading and SIMULATION_AVAILABLE and 'account' in locals():
+                st.markdown("### 🚀 Execute Trading")
+                
+                col1, col2 = st.columns([3, 1])
+                with col1:
+                    st.markdown("**Ready to execute automated trading based on the analysis above.**")
+                    st.markdown(f"• **Portfolio:** {portfolio.name} ({len(portfolio.holdings)} stocks)")
+                    st.markdown(f"• **Investment:** ${investment_amount:,.0f}")
+                    st.markdown(f"• **Risk Level:** {risk_level.title()}")
+                    st.markdown(f"• **Analysis Method:** {analysis_method.title()}")
+                
+                with col2:
+                    execute_trading = st.button(
+                        "🚀 Execute Automated Trading",
+                        type="primary",
+                        key="execute_analysis_auto_trade",
+                        help="Execute automated trading based on portfolio analysis"
+                    )
+                
+                if execute_trading:
+                    selected_stocks = [h.symbol for h in portfolio.holdings]
+                    
+                    with st.spinner("🤖 Analyzing stocks and generating recommendations..."):
+                        try:
+                            # Import required components
+                            from src.engines.recommendation_engine import RecommendationEngine
+                            from src.analyzers.stock_analyzer import StockAnalyzer
+                            from src.languages.config import LanguageConfig
+                            
+                            # Map analysis method to strategy type
+                            strategy_mapping = {
+                                "comprehensive": "all",
+                                "technical": "technical",
+                                "fundamental": "quantitative"
+                            }
+                            strategy_type = strategy_mapping.get(analysis_method, "all")
+                            
+                            # Generate recommendations
+                            recommendations = []
+                            lang_config = LanguageConfig("en")
+                            
+                            progress_bar = st.progress(0)
+                            status_text = st.empty()
+                            
+                            for i, symbol in enumerate(selected_stocks):
+                                try:
+                                    status_text.text(f"🔍 Analyzing {symbol}...")
+                                    progress_bar.progress((i) / len(selected_stocks))
+                                    
+                                    # Create analyzer
+                                    analyzer_instance = StockAnalyzer(symbol)
+                                    analyzer_instance.fetch_data()
+                                    
+                                    # Generate recommendation
+                                    recommendation_engine = RecommendationEngine(analyzer_instance, lang_config)
+                                    recommendation = recommendation_engine.generate_recommendation_for_symbol(
+                                        analyzer_instance, symbol, strategy_type
+                                    )
+                                    
+                                    recommendations.append(recommendation)
+                                    
+                                except Exception as e:
+                                    st.warning(f"⚠️ Failed to analyze {symbol}: {str(e)}")
+                                    continue
+                            
+                            progress_bar.progress(1.0)
+                            status_text.text("✅ Analysis completed!")
+                            
+                            if not recommendations:
+                                st.error("❌ No valid recommendations generated")
+                                return
+                            
+                            # Execute automated trading
+                            status_text.text("💰 Executing automated trades...")
+                            result = st.session_state.automated_trader.execute_portfolio_recommendations(
+                                account.account_id,
+                                recommendations,
+                                available_cash=investment_amount
+                            )
+                            
+                            if result["success"]:
+                                st.success("✅ Automated trading completed successfully!")
+                                
+                                # Display results
+                                col1, col2, col3, col4 = st.columns(4)
+                                with col1:
+                                    st.metric("Successful Trades", result["successful_trades"])
+                                with col2:
+                                    st.metric("Failed Trades", result["failed_trades_count"])
+                                with col3:
+                                    st.metric("Total Invested", f"${result['total_invested']:,.0f}")
+                                with col4:
+                                    st.metric("Recommendations", len(recommendations))
+                                
+                                # Show recommendation breakdown
+                                if "recommendation_summary" in result:
+                                    rec_summary = result["recommendation_summary"]
+                                    st.markdown("**Recommendation Breakdown:**")
+                                    col1, col2, col3 = st.columns(3)
+                                    with col1:
+                                        st.info(f"🟢 BUY: {rec_summary['buy_recommendations']}")
+                                    with col2:
+                                        st.info(f"🔴 SELL: {rec_summary['sell_recommendations']}")
+                                    with col3:
+                                        st.info(f"🟡 HOLD: {rec_summary['hold_recommendations']}")
+                                    
+                                    # Explain if no trades were executed
+                                    if result["successful_trades"] == 0 and result["failed_trades_count"] == 0:
+                                        if rec_summary['buy_recommendations'] == 0 and rec_summary['sell_recommendations'] == 0:
+                                            st.warning("⚠️ No BUY or SELL recommendations were generated. All recommendations were HOLD. Consider using different stocks or analysis methods to generate trading signals.")
+                                
+                                # Account status update
+                                if result["account_summary"]:
+                                    acc = result["account_summary"]["account"]
+                                    st.markdown("### 📊 Account Status Update")
+                                    col1, col2, col3 = st.columns(3)
+                                    with col1:
+                                        st.metric("Current Balance", f"${acc.current_balance:,.2f}")
+                                    with col2:
+                                        st.metric("Total Value", f"${acc.total_value:,.2f}")
+                                    with col3:
+                                        st.metric("Total Return", f"{acc.total_return:+.1f}%")
+                                
+                                # Portfolio holdings update
+                                st.markdown("### 📁 Portfolio Holdings Update")
+                                try:
+                                    # Get account positions from trading results
+                                    account_summary = result.get("account_summary", {})
+                                    positions = account_summary.get("positions", {})
+                                    
+                                    if positions:
+                                        # Portfolio summary
+                                        total_value = sum(pos.market_value for pos in positions.values())
+                                        total_positions = len(positions)
+                                        
+                                        col1, col2, col3, col4 = st.columns(4)
+                                        with col1:
+                                            st.metric("Total Positions", total_positions)
+                                        with col2:
+                                            st.metric("Portfolio Value", f"${total_value:,.2f}")
+                                        with col3:
+                                            st.metric("Account", account.account_name)
+                                        with col4:
+                                            st.metric("Last Updated", datetime.now().strftime("%H:%M:%S"))
+                                        
+                                        # Holdings table
+                                        st.markdown("**Current Positions:**")
+                                        
+                                        holdings_data = []
+                                        for symbol, position in positions.items():
+                                            holdings_data.append({
+                                                "Symbol": symbol,
+                                                "Quantity": f"{position.quantity:,.0f}",
+                                                "Avg Cost": f"${position.average_cost:.2f}",
+                                                "Current Price": f"${position.current_price:.2f}",
+                                                "Market Value": f"${position.market_value:,.2f}",
+                                                "Unrealized P&L": f"${position.unrealized_pnl:+,.2f}",
+                                                "P&L %": f"{position.unrealized_pnl_pct:+.1f}%"
+                                            })
+                                        
+                                        holdings_df = pd.DataFrame(holdings_data)
+                                        st.dataframe(holdings_df, use_container_width=True)
+                                        
+                                        # Holdings summary
+                                        st.markdown("**Portfolio Summary:**")
+                                        total_cost = sum(pos.average_cost * pos.quantity for pos in positions.values())
+                                        total_pnl = sum(pos.unrealized_pnl for pos in positions.values())
+                                        total_pnl_pct = (total_pnl / total_cost * 100) if total_cost > 0 else 0
+                                        
+                                        col1, col2, col3 = st.columns(3)
+                                        with col1:
+                                            st.metric("Total Cost Basis", f"${total_cost:,.2f}")
+                                        with col2:
+                                            st.metric("Total P&L", f"${total_pnl:+,.2f}")
+                                        with col3:
+                                            st.metric("Total P&L %", f"{total_pnl_pct:+.1f}%")
+                                    else:
+                                        st.info("No positions in account after trading.")
+                                        
+                                except Exception as e:
+                                    st.warning(f"⚠️ Could not refresh account positions: {e}")
+                                    # Fallback to portfolio holdings if account positions unavailable
+                                    try:
+                                        updated_portfolio = manager.get_portfolio(portfolio.name)
+                                        if updated_portfolio.holdings:
+                                            st.markdown("**Portfolio Holdings (from portfolio data):**")
+                                            holdings_text = ", ".join([f"{h.symbol} ({h.weight:.1f}%)" for h in updated_portfolio.holdings])
+                                            st.info(holdings_text)
+                                    except Exception as e2:
+                                        st.warning(f"⚠️ Could not load portfolio data either: {e2}")
+                                
+                                # Executed trade details
+                                if result["executed_trades"]:
+                                    st.markdown("### 💼 Executed Trades")
+                                    for trade in result["executed_trades"]:
+                                        with st.expander(f"{trade['action']} {trade['quantity']} {trade['symbol']} @ ${trade['price']:.2f}"):
+                                            st.write(f"Amount: ${trade['amount']:,.2f}")
+                                            if 'recommendation' in trade:
+                                                rec = trade['recommendation']['recommendation']
+                                                st.write(f"AI Recommendation: {rec['action']} (confidence: {rec['confidence']})")
+                                
+                                # Failed trades
+                                if result["failed_trades"]:
+                                    st.markdown("### ❌ Failed Trades")
+                                    for trade in result["failed_trades"]:
+                                        st.error(f"{trade['action']} {trade['symbol']}: {trade['error']}")
+                            
+                            else:
+                                st.error(f"❌ Automated trading failed: {result.get('error', 'Unknown error')}")
+                            
+                        except Exception as e:
+                            st.error(f"❌ Error during automated trading: {str(e)}")
+                        finally:
+                            progress_bar.empty()
+                            status_text.empty()
     
     except Exception as e:
         st.error(f"❌ Analysis failed: {e}")
@@ -1728,469 +1946,6 @@ def show_performance_analysis():
 
 
 def show_automated_trading():
-    """Display AI-based automated trading page"""
-    st.subheader("🤖 Automated Trading")
-
-    # Get components
-    simulation_manager = st.session_state.simulation_manager
-    automated_trader = st.session_state.automated_trader
-
-    # Check if accounts exist
-    user_id = st.session_state.get('user_id', 'demo_user')
-    accounts = simulation_manager.get_user_accounts(user_id)
-
-    if not accounts:
-        st.warning("Please create a simulation account first to use automated trading features")
-        return
-
-    # Account selection
-    account_options = {acc.account_id: f"{acc.account_name} (${acc.current_balance:,.0f})"
-                      for acc in accounts}
-    selected_account_id = st.selectbox(
-        "Select Trading Account",
-        options=list(account_options.keys()),
-        format_func=lambda x: account_options[x]
-    )
-
-    # Portfolio selection - use real configured portfolio
-    manager = st.session_state.portfolio_manager
-    portfolios = manager.list_portfolios()
-    
-    if not portfolios:
-        st.warning("Please create a portfolio first to use automated trading")
-        return
-    
-    portfolio_options = {p.name: f"{p.name} ({len(p.holdings)} stocks, {p.strategy_type.value.title()})" for p in portfolios}
-    selected_portfolio_name = st.selectbox(
-        "Select Portfolio for Automated Trading",
-        options=list(portfolio_options.keys()),
-        format_func=lambda x: portfolio_options[x],
-        help="Choose a portfolio with real stock holdings for automated trading"
-    )
-    
-    selected_portfolio = manager.get_portfolio(selected_portfolio_name)
-    portfolio_stocks = [h.symbol for h in selected_portfolio.holdings]
-    
-    # Display portfolio information
-    st.markdown("### 📊 Portfolio Configuration")
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.metric("Strategy", selected_portfolio.strategy_type.value.title())
-    with col2:
-        st.metric("Total Holdings", len(selected_portfolio.holdings))
-    with col3:
-        st.metric("Total Weight", f"{selected_portfolio.total_weight:.1%}")
-    
-    # Display current holdings
-    if selected_portfolio.holdings:
-        holdings_data = []
-        for holding in selected_portfolio.holdings:
-            holdings_data.append({
-                "Symbol": holding.symbol,
-                "Weight": f"{holding.weight:.1%}",
-                "Notes": holding.notes or ""
-            })
-        
-        st.markdown("**Current Portfolio Holdings:**")
-        st.dataframe(pd.DataFrame(holdings_data), use_container_width=True)
-        
-        # Use portfolio stocks for automated trading
-        selected_stocks = portfolio_stocks
-        st.success(f"✅ Using {len(selected_stocks)} stocks from portfolio '{selected_portfolio_name}' for automated trading")
-    else:
-        st.warning("Selected portfolio has no holdings. Please add stocks to the portfolio first.")
-        return
-
-    # Capital allocation settings
-    st.markdown("### 💰 Capital Allocation Settings")
-    col1, col2 = st.columns(2)
-
-    with col1:
-        use_full_balance = st.checkbox("Use Full Available Balance", value=True)
-        if not use_full_balance:
-            custom_amount = st.number_input(
-                "Custom Investment Amount",
-                min_value=1000.0,
-                max_value=1000000.0,
-                value=50000.0,
-                step=1000.0
-            )
-
-    with col2:
-        confirm_execution = st.checkbox("Confirm Trade Execution", value=False, help="Please review analysis results carefully before confirming execution")
-
-    # Execute button
-    if st.button("🚀 Start AI Analysis & Auto Trading", type="primary", disabled=not confirm_execution):
-        if not confirm_execution:
-            st.error("Please confirm trade execution first")
-            return
-
-        with st.spinner("🤖 AI analyzing stocks and executing trades..."):
-            progress_bar = st.progress(0)
-            status_text = st.empty()
-
-            try:
-                # Step 1: Get stock data
-                status_text.text("📡 Getting stock data...")
-                progress_bar.progress(0.1)
-
-                # Import recommendation engine
-                from src.engines.recommendation_engine import RecommendationEngine
-                from src.analyzers.stock_analyzer import StockAnalyzer
-                from src.languages.config import LanguageConfig
-
-                lang_config = LanguageConfig("en")
-                recommendations = []
-
-                # Step 2: Analyze each stock
-                status_text.text("🔍 AI analyzing...")
-                for i, symbol in enumerate(selected_stocks):
-                    try:
-                        progress = 0.1 + (i / len(selected_stocks)) * 0.6
-                        progress_bar.progress(progress)
-                        status_text.text(f"🔍 Analyzing {symbol}...")
-
-                        # Create analyzer and fetch data
-                        analyzer = StockAnalyzer(symbol)
-                        analyzer.fetch_data()
-
-                        # Generate recommendation
-                        recommendation_engine = RecommendationEngine(analyzer, lang_config)
-                        recommendation = recommendation_engine.generate_recommendation_for_symbol(
-                            analyzer, symbol, 'combined'
-                        )
-
-                        recommendations.append(recommendation)
-
-                        # Display real-time analysis results
-                        rec = recommendation['recommendation']
-                        st.info(f"📈 {symbol}: {rec['action']} (confidence: {rec['confidence']})")
-
-                    except Exception as e:
-                        st.warning(f"⚠️ {symbol} analysis failed: {str(e)}")
-                        continue
-
-                # Step 3: Execute automated trading
-                status_text.text("💼 Executing automated trading...")
-                progress_bar.progress(0.8)
-
-                available_cash = None
-                if not use_full_balance:
-                    available_cash = custom_amount
-
-                # Execute trades based on recommendations
-                result = automated_trader.execute_portfolio_recommendations(
-                    selected_account_id,
-                    recommendations,
-                    available_cash=available_cash
-                )
-
-                progress_bar.progress(1.0)
-                status_text.text("✅ Trade execution completed!")
-
-                # Display results
-                if result["success"]:
-                    st.success("🎉 Automated trading executed successfully!")
-
-                    # Trade statistics
-                    col1, col2, col3 = st.columns(3)
-                    with col1:
-                        st.metric("Successful Trades", result["successful_trades"])
-                    with col2:
-                        st.metric("Failed Trades", result["failed_trades_count"])
-                    with col3:
-                        st.metric("Total Invested", f"${result['total_invested']:,.2f}")
-
-                    # Account status update
-                    if result["account_summary"]:
-                        acc = result["account_summary"]["account"]
-                        st.markdown("### 📊 Account Status Update")
-                        col1, col2, col3 = st.columns(3)
-                        with col1:
-                            st.metric("Current Balance", f"${acc.current_balance:,.2f}")
-                        with col2:
-                            st.metric("Total Value", f"${acc.total_value:,.2f}")
-                        with col3:
-                            st.metric("Total Return", f"{acc.total_return:+.1f}%")
-
-                    # Executed trade details
-                    if result["executed_trades"]:
-                        st.markdown("### 💼 Executed Trades")
-                        for trade in result["executed_trades"]:
-                            with st.expander(f"{trade['action']} {trade['quantity']} {trade['symbol']} @ ${trade['price']:.2f}"):
-                                st.write(f"Amount: ${trade['amount']:,.2f}")
-                                if 'recommendation' in trade:
-                                    rec = trade['recommendation']['recommendation']
-                                    st.write(f"AI Recommendation: {rec['action']} (confidence: {rec['confidence']})")
-
-                    # Failed trades
-                    if result["failed_trades"]:
-                        st.markdown("### ❌ Failed Trades")
-                        for trade in result["failed_trades"]:
-                            st.error(f"{trade['action']} {trade['symbol']}: {trade['error']}")
-
-                else:
-                    st.error(f"❌ Automated trading failed: {result.get('error', 'Unknown error')}")
-
-            except Exception as e:
-                st.error(f"❌ Error during execution: {str(e)}")
-                progress_bar.progress(0)
-                status_text.empty()
-
-    # Usage instructions
-    with st.expander("📖 Usage Instructions"):
-        st.markdown("""
-        **AI-Based Automated Trading Feature:**
-
-        1. **Smart Analysis**: AI analyzes technical indicators and market trends of selected stocks
-        2. **Automated Decision**: Generates buy/sell/hold recommendations based on analysis results
-        3. **Smart Execution**: Automatically allocates funds and executes recommended trades
-        4. **Risk Control**: Includes trade validation and capital adequacy checks
-
-        **Important Notes:**
-        - This is a simulation trading environment, no real money loss will occur
-        - AI recommendations are for reference only, not investment advice
-        - Please review analysis results before deciding to execute trades
-        """)
-
-# Simulation Trading Pages
-def show_simulation_trading():
-    """Main simulation trading page with sub-navigation."""
-    if not SIMULATION_AVAILABLE:
-        st.error("❌ Simulation trading components are not available. Please check the installation.")
-        return
-
-    st.sidebar.markdown("---")
-    st.sidebar.markdown("### 🎮 Simulation Trading")
-
-    simulation_page = st.sidebar.selectbox(
-        "Simulation Trading Features",
-        ["Account Management", "Virtual Trading", "Historical Backtesting", "Performance Analysis"],
-        key="simulation_page"
-    )
-
-    if simulation_page == "Account Management":
-        show_simulation_accounts()
-    elif simulation_page == "Virtual Trading":
-        show_virtual_trading()
-    elif simulation_page == "Historical Backtesting":
-        show_backtesting()
-    elif simulation_page == "Performance Analysis":
-        st.header("📊 Performance Analysis")
-        st.info("Performance analysis feature is under development...")
-
-
-def show_simulation():
-    """Display simulation trading main page with sub-navigation"""
-    simulation_page = st.sidebar.selectbox(
-        "Simulation Features",
-        ["Account Management", "Automated Trading", "Performance Analysis"],
-        key="simulation_page"
-    )
-
-    if simulation_page == "Account Management":
-        show_simulation_accounts()
-    elif simulation_page == "Automated Trading":
-        show_automated_trading()
-    elif simulation_page == "Performance Analysis":
-        st.header("📊 Performance Analysis")
-        st.info("Performance analysis feature is under development...")
-
-
-def show_simulation_unavailable():
-    """Display message when simulation features are not available"""
-    st.header("🎮 Simulation Trading")
-    st.warning("⚠️ Simulation trading features are not available. Please check that all required dependencies are installed.")
-    st.info("Required packages: simulation trading modules")
-
-
-def show_simulation_accounts():
-    """Display simulation account management page"""
-    st.header("🎮 Simulation Trading Accounts")
-
-    col1, col2 = st.columns([2, 1])
-
-    with col1:
-        st.subheader("My Accounts")
-
-        # Get user accounts (assuming user_id from session)
-        user_id = "demo_user"  # Temporary user ID
-        accounts = st.session_state.simulation_manager.get_user_accounts(user_id)
-
-        if not accounts:
-            st.info("You don't have any simulation accounts yet. Create one to start investing!")
-            if st.button("Create Simulation Account", type="primary"):
-                account = st.session_state.simulation_manager.create_account(
-                    user_id=user_id,
-                    account_name="My First Simulation Account",
-                    initial_balance=100000.0
-                )
-                st.success(f"✅ Account created successfully! Initial balance: ${account.initial_balance:,.0f}")
-                st.rerun()
-        else:
-            for account in accounts:
-                with st.expander(f"📊 {account.account_name}", expanded=True):
-                    col_a, col_b, col_c = st.columns(3)
-
-                    with col_a:
-                        st.metric("Total Assets", f"${account.total_value:,.0f}")
-                        st.metric("Available Funds", f"${account.available_balance:,.0f}")
-
-                    with col_b:
-                        pnl = account.total_value - account.initial_balance
-                        pnl_pct = account.total_return
-                        st.metric("P&L", f"${pnl:+,.0f}",
-                                delta=f"{pnl_pct:+.1f}%" if pnl_pct else None)
-
-                    with col_c:
-                        positions = st.session_state.simulation_manager.calculate_positions(account.account_id)
-                        st.metric("Position Stocks", len(positions))
-                        st.metric("Total Return", f"{account.total_return:+.1f}%")
-
-    with col2:
-        st.subheader("Quick Actions")
-
-        if st.button("💰 Add Funds", type="secondary"):
-            # Add deposit dialog here
-            pass
-
-        if st.button("📈 View Transaction History", type="secondary"):
-            # Navigate to transaction history page here
-            pass
-
-
-def show_virtual_trading():
-    """Display virtual trading page"""
-    st.header("💹 Virtual Trading")
-
-    # Select account
-    user_id = "demo_user"
-    accounts = st.session_state.simulation_manager.get_user_accounts(user_id)
-
-    if not accounts:
-        st.warning("Please create a simulation account first")
-        return
-
-    account_id = st.selectbox(
-        "Select Trading Account",
-        [acc.account_id for acc in accounts],
-        format_func=lambda x: next(acc.account_name for acc in accounts if acc.account_id == x)
-    )
-
-    account = next(acc for acc in accounts if acc.account_id == account_id)
-
-    # Display account status
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.metric("Available Funds", f"${account.available_balance:,.0f}")
-    with col2:
-        st.metric("Total Assets", f"${account.total_value:,.0f}")
-    with col3:
-        st.metric("Return Rate", f"{account.total_return:+.1f}%")
-
-    st.markdown("---")
-
-    # Trading form
-    col1, col2 = st.columns(2)
-
-    with col1:
-        st.subheader("📈 Buy Stocks")
-        with st.form("buy_form"):
-            buy_symbol = st.text_input("Stock Symbol", "AAPL").upper()
-            buy_quantity = st.number_input("Quantity", min_value=1, value=10)
-
-            buy_submitted = st.form_submit_button("Buy", type="primary")
-
-            if buy_submitted:
-                try:
-                    # Validate order
-                    validation = st.session_state.virtual_trader.validate_order(
-                        account_id, buy_symbol, buy_quantity, TransactionType.BUY
-                    )
-
-                    if validation["valid"]:
-                        # Execute trade
-                        transaction = st.session_state.virtual_trader.execute_buy_order(
-                            account_id, buy_symbol, buy_quantity
-                        )
-
-                        st.success(f"✅ Buy successful!\\n"
-                                 f"Stock: {buy_symbol}\\n"
-                                 f"Quantity: {buy_quantity}\\n"
-                                 f"Price: ${transaction.price:.2f}\\n"
-                                 f"Total Amount: ${transaction.total_amount:.2f}")
-
-                        st.rerun()
-                    else:
-                        st.error(f"❌ Trade failed: {validation['message']}")
-
-                except Exception as e:
-                    st.error(f"❌ Trade failed: {str(e)}")
-
-    with col2:
-        st.subheader("📉 Sell Stocks")
-        with st.form("sell_form"):
-            # Get current positions
-            positions = st.session_state.simulation_manager.calculate_positions(account_id)
-            if positions:
-                sell_symbol = st.selectbox("Select Stock", list(positions.keys()))
-                max_quantity = positions[sell_symbol].quantity
-                sell_quantity = st.number_input("Quantity", min_value=1, max_value=max_quantity, value=min(10, max_quantity))
-
-                sell_submitted = st.form_submit_button("Sell", type="secondary")
-
-                if sell_submitted:
-                    try:
-                        # Validate order
-                        validation = st.session_state.virtual_trader.validate_order(
-                            account_id, sell_symbol, sell_quantity, TransactionType.SELL
-                        )
-
-                        if validation["valid"]:
-                            # Execute trade
-                            transaction = st.session_state.virtual_trader.execute_sell_order(
-                                account_id, sell_symbol, sell_quantity
-                            )
-
-                            st.success(f"✅ Sell successful!\\n"
-                                     f"Stock: {sell_symbol}\\n"
-                                     f"Quantity: {sell_quantity}\\n"
-                                     f"Price: ${transaction.price:.2f}\\n"
-                                     f"Total Amount: ${transaction.total_amount:.2f}")
-
-                            st.rerun()
-                        else:
-                            st.error(f"❌ Trade failed: {validation['message']}")
-
-                    except Exception as e:
-                        st.error(f"❌ Trade failed: {str(e)}")
-            else:
-                st.info("No positions")
-
-    # Display current positions
-    st.markdown("---")
-    st.subheader("📊 Current Positions")
-
-    positions = st.session_state.simulation_manager.calculate_positions(account_id)
-    if positions:
-        positions_data = []
-        for symbol, position in positions.items():
-            positions_data.append({
-                "Stock": symbol,
-                "Quantity": position.quantity,
-                "Average Cost": f"${position.average_cost:.2f}",
-                "Current Price": f"${position.current_price:.2f}",
-                "Market Value": f"${position.market_value:.2f}",
-                "P&L": f"${position.unrealized_pnl:+.2f}",
-                "P&L %": f"{position.unrealized_pnl_pct:+.1f}%"
-            })
-
-        st.dataframe(positions_data, use_container_width=True)
-    else:
-        st.info("No positions")
-
-
-def show_automated_trading():
     """Display automated trading page"""
     st.header("🤖 Automated Trading")
 
@@ -2227,58 +1982,85 @@ def show_automated_trading():
 
     st.markdown("---")
 
-    # Automated trading configuration
-    st.subheader("⚙️ Trading Configuration")
+    # Portfolio selection for automated trading
+    portfolios = st.session_state.portfolio_manager.list_portfolios()
 
-    col1, col2 = st.columns(2)
+    if not portfolios:
+        st.warning("No portfolios available. Create a portfolio first to use automated trading.")
+        return
+
+    portfolio_options = {p.name: f"{p.name} ({len(p.holdings)} stocks)" for p in portfolios}
+    selected_portfolio_name = st.selectbox(
+        "Select Portfolio for Automated Trading",
+        options=list(portfolio_options.keys()),
+        format_func=lambda x: portfolio_options[x],
+        key="auto_trade_portfolio"
+    )
+
+    selected_portfolio = st.session_state.portfolio_manager.get_portfolio(selected_portfolio_name)
+
+    # Display portfolio information
+    st.markdown("### 📁 Selected Portfolio")
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.metric("Total Stocks", len(selected_portfolio.holdings))
+    with col2:
+        st.metric("Strategy", selected_portfolio.strategy_type.value.title())
+    with col3:
+        st.metric("Created", selected_portfolio.created_time.strftime("%Y-%m-%d"))
+
+    # List portfolio stocks
+    if selected_portfolio.holdings:
+        st.markdown("**Portfolio Stocks:**")
+        stocks_text = ", ".join([f"{h.symbol} ({h.weight:.1f}%)" for h in selected_portfolio.holdings])
+        st.info(stocks_text)
+
+    st.markdown("---")
+
+    # Trading configuration
+    col1, col2, col3 = st.columns(3)
 
     with col1:
-        # Stock selection
-        default_stocks = ["AAPL", "MSFT", "GOOGL", "AMZN", "TSLA", "NVDA", "META", "NFLX"]
-        selected_stocks = st.multiselect(
-            "Select Stocks to Analyze",
-            default_stocks,
-            default=["AAPL", "MSFT", "GOOGL"],
-            key="auto_trade_stocks"
-        )
-
-        # Investment amount
-        max_investment = min(account.available_balance, account.total_value * 0.5)  # Max 50% of total value
         investment_amount = st.number_input(
             "Investment Amount ($)",
-            min_value=1000.0,
-            max_value=float(max_investment),
-            value=min(10000.0, max_investment),
-            step=1000.0,
+            min_value=100.0,
+            max_value=float(account.available_balance),
+            value=min(10000.0, float(account.available_balance)),
+            step=100.0,
             key="auto_trade_amount"
         )
 
     with col2:
-        # Analysis method
-        analysis_method = st.selectbox(
-            "Analysis Method",
-            ["combined", "technical", "fundamental"],
-            format_func=lambda x: {
-                "combined": "Combined Analysis",
-                "technical": "Technical Analysis",
-                "fundamental": "Fundamental Analysis"
-            }.get(x, x),
-            key="auto_trade_method"
-        )
-
-        # Risk level
         risk_level = st.selectbox(
             "Risk Level",
             ["conservative", "moderate", "aggressive"],
-            format_func=lambda x: x.title(),
+            format_func=lambda x: {
+                "conservative": "Conservative (Low Risk)",
+                "moderate": "Moderate (Balanced)",
+                "aggressive": "Aggressive (High Risk)"
+            }.get(x, x),
             key="auto_trade_risk"
+        )
+
+    with col3:
+        analysis_method = st.selectbox(
+            "Analysis Method",
+            ["comprehensive", "technical", "fundamental"],
+            format_func=lambda x: {
+                "comprehensive": "Comprehensive",
+                "technical": "Technical Only",
+                "fundamental": "Fundamental Only"
+            }.get(x, x),
+            key="auto_trade_analysis"
         )
 
     # Execute automated trading
     if st.button("🚀 Execute Automated Trading", type="primary", key="execute_auto_trade"):
-        if not selected_stocks:
-            st.error("❌ Please select at least one stock to analyze")
+        if not selected_portfolio.holdings:
+            st.error("❌ Selected portfolio has no stocks to analyze")
             return
+
+        selected_stocks = [h.symbol for h in selected_portfolio.holdings]
 
         with st.spinner("🤖 Analyzing stocks and generating recommendations..."):
             try:
@@ -2303,10 +2085,18 @@ def show_automated_trading():
                         analyzer = StockAnalyzer(symbol)
                         analyzer.fetch_data()
 
+                        # Map analysis method to strategy type
+                        strategy_mapping = {
+                            "comprehensive": "all",
+                            "technical": "technical",
+                            "fundamental": "quantitative"
+                        }
+                        strategy_type = strategy_mapping.get(analysis_method, "all")
+
                         # Generate recommendation
                         recommendation_engine = RecommendationEngine(analyzer, lang_config)
                         recommendation = recommendation_engine.generate_recommendation_for_symbol(
-                            analyzer, symbol, analysis_method
+                            analyzer, symbol, strategy_type
                         )
 
                         recommendations.append(recommendation)
